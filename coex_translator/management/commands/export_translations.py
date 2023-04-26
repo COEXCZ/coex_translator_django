@@ -28,6 +28,8 @@ class Command(BaseCommand):
         # TODO: check if COEX_TRANSLATOR_API_BASE_URL is set in settings
         # TODO: check if COEX_TRANSLATOR_API_TOKEN is set in settings
 
+        # TODO: make sure all settings.LOCALE_PATHS exist
+
         call_command('makemessages', locale=[settings.LANGUAGE_CODE])
 
         messages = set()

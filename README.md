@@ -50,3 +50,11 @@ Set COex Translator API base URL.
 ```diff
 + COEX_TRANSLATOR_API_BASE_URL = config('COEX_TRANSLATOR_API_BASE_URL', default='')
 ```
+
+## Contribution
+
+Install with dev dependencies
+
+```shell
+poetry install --with dev
+```

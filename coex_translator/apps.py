@@ -6,4 +6,6 @@ class CoexTranslatorConfig(AppConfig):
     name = 'coex_translator'
 
     def ready(self):
-        from . import translation
+        from .translation import monkeypatch_translations
+
+        monkeypatch_translations()

@@ -1,0 +1,3 @@
+from coex_translator.translation import monkeypatch_translations
+
+monkeypatch_translations()

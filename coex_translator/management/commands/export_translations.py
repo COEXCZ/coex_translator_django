@@ -41,16 +41,12 @@ class Command(BaseCommand):
                     result = self.msg_regex.findall(file.read())
                 messages = messages.union(set(result))
         body = {
-            'languages': [
-                lang[0]
-                for lang in settings.LANGUAGES
-            ],
-            'messages': [
-                {'key': msg}
-                for msg in messages
-            ],
-            'branch_name': options['branch_name'],
-            'commit_id': options.get('commit_id', '')
+            'messages': {msg: None for msg in messages},  # None is the default translation (We don't have it on BE)
+            'app_name': settings.PROJECT_NAME,
+            'meta': {
+                'branch_name': options['branch_name'],
+                'commit_id': options.get('commit_id', None)
+            }
         }
 
         requests.post(

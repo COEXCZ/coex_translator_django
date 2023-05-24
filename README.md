@@ -51,6 +51,15 @@ Set COex Translator API base URL.
 + COEX_TRANSLATOR_API_BASE_URL = config('COEX_TRANSLATOR_API_BASE_URL', default='')
 ```
 
+Set AMQP Configuration.
+
+```diff
++ COEX_TRANSLATOR_AMQP_BROKER_URL = config('COEX_TRANSLATOR_AMQP_BROKER_URL', default='')
++ COEX_TRANSLATOR_AMQP_QUEUE_PREFIX = config('COEX_TRANSLATOR_AMQP_QUEUE_PREFIX', default='')
++ COEX_TRANSLATOR_AMQP_EXCHANGE = config('COEX_TRANSLATOR_AMQP_EXCHANGE', default='')
++ COEX_TRANSLATOR_AMQP_ROUTING_KEY = config('COEX_TRANSLATOR_AMQP_ROUTING_KEY', default='')
+```
+
 ## Contribution
 
 Install with dev dependencies

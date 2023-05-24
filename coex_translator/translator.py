@@ -11,7 +11,7 @@ from coex_translator.singleton import Singleton
 logger = logging.getLogger(__name__)
 
 
-TRANSLATION_UPDATE_MESSAGE = 'update_translations'
+TRANSLATION_UPDATE_MESSAGE = 'translations_published'
 
 
 class Translator(metaclass=Singleton):

@@ -19,11 +19,12 @@ class ThreadedAMPQConsumer(threading.Thread):
         connection = pika.BlockingConnection(parameters)
         self.channel = connection.channel()
         queue_name = f'{self.QUEUE_PREFIX}{socket.gethostname()}'
-        self.channel.queue_declare(queue=queue_name)
+        self.channel.queue_declare(queue=queue_name, auto_delete=True)
         self.channel.exchange_declare(
             exchange=self.EXCHANGE,
             exchange_type=pika.exchange_type.ExchangeType.direct,
-            passive=True
+            passive=True,
+            auto_delete=True
         )
         self.channel.queue_bind(queue=queue_name, exchange=self.EXCHANGE, routing_key=self.ROUTING_KEY)
         self.channel.basic_consume(queue_name, on_message_callback=self.callback)

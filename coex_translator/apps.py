@@ -1,4 +1,5 @@
 from django.apps import AppConfig
+from django.conf import settings
 
 
 class CoexTranslatorConfig(AppConfig):
@@ -9,6 +10,6 @@ class CoexTranslatorConfig(AppConfig):
         from . import gettext
         from coex_translator.consumer import ThreadedTranslationAMQPConsumer
 
-        translation_consumer = ThreadedTranslationAMQPConsumer(daemon=True)
-        translation_consumer.start()
-
+        if settings.TRANSLATION_AMQP_CONSUMER_DAEMON_ENABLED:
+            translation_consumer = ThreadedTranslationAMQPConsumer(daemon=True)
+            translation_consumer.start()

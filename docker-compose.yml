@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  web:
+    image: coex_translator_test_django
+    build:
+      context: .
+      dockerfile: provisioning/compose/localhost/django/Dockerfile
+    command: ['python', 'manage.py', 'runserver', "0.0.0.0:8000"]
+    env_file:
+      - .env
+    volumes:
+      - ./test_project/:/app/test_project/
+      - ./manage.py:/app/manage.py
+    ports:
+      - "8000:8000"
+    networks:
+      - coex_translator_test
+    depends_on:
+      - rabbitmq
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: coex_translator_test
+      RABBITMQ_DEFAULT_PASS: coex_translator_test
+      RABBITMQ_DEFAULT_VHOST: coex_translator_test
+    networks:
+      - coex_translator_test
+    ports:
+      - "15672:15672"
+
+networks:
+  coex_translator_test:

@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 import os
 from pathlib import Path
 
-from decouple import AutoConfig
+from decouple import AutoConfig, Csv
 
 config = AutoConfig(os.environ.get("DJANGO_CONFIG_ENV_DIR"))
 
@@ -32,7 +32,7 @@ SECRET_KEY = 'django-insecure-wp2v1^#%mv&!m9_d^%@2w@mcjnlgx%_xv-4fgl!las%(vl(yc#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config('PROJECT_ALLOWED_HOSTS', cast=Csv(), default='')
 
 
 # Application definition
@@ -133,6 +133,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DJANGO_CACHE_TRANSLATIONS = 'translations'
 CACHES = {
+    'default': {
+        "BACKEND": "django.core.cache.backends.dummy.DummyCache",
+    },
     DJANGO_CACHE_TRANSLATIONS: {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         'LOCATION': '{}:{}:{}'.format(PROJECT_NAME, ENVIRONMENT, DJANGO_CACHE_TRANSLATIONS),
@@ -141,9 +144,11 @@ CACHES = {
     }
 }
 
-COEX_TRANSLATOR_API_BASE_URL = config('COEX_TRANSLATOR_API_BASE_URL', default='')
+TRANSLATION_AMQP_CONSUMER_DAEMON_ENABLED = config('TRANSLATION_AMQP_CONSUMER_DAEMON_ENABLED', default=False, cast=bool)
 
-COEX_TRANSLATOR_AMQP_BROKER_URL = config('COEX_TRANSLATOR_AMQP_BROKER_URL', default='')
-COEX_TRANSLATOR_AMQP_QUEUE_PREFIX = config('COEX_TRANSLATOR_AMQP_QUEUE_PREFIX', default='')
-COEX_TRANSLATOR_AMQP_EXCHANGE = config('COEX_TRANSLATOR_AMQP_EXCHANGE', default='')
-COEX_TRANSLATOR_AMQP_ROUTING_KEY = config('COEX_TRANSLATOR_AMQP_ROUTING_KEY', default='')
+COEX_TRANSLATOR_API_BASE_URL = config('COEX_TRANSLATOR_API_BASE_URL', default='')
+COEX_TRANSLATOR_UVICORN_RELOAD_FILE_PATH = config('COEX_TRANSLATOR_UVICORN_RELOAD_FILE_PATH', default='')
+COEX_TRANSLATOR_AMQP_BROKER_URL = config('COEX_TRANSLATOR_AMQP_BROKER_URL', default=f"amqp://{PROJECT_NAME}:{PROJECT_NAME}@rabbitmq/{PROJECT_NAME}")
+COEX_TRANSLATOR_AMQP_QUEUE_PREFIX = config('COEX_TRANSLATOR_AMQP_QUEUE_PREFIX', default='translation')
+COEX_TRANSLATOR_AMQP_EXCHANGE = config('COEX_TRANSLATOR_AMQP_EXCHANGE', default='translation')
+COEX_TRANSLATOR_AMQP_ROUTING_KEY = config('COEX_TRANSLATOR_AMQP_ROUTING_KEY', default='translation')

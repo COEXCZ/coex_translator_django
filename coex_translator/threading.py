@@ -16,8 +16,8 @@ class ThreadedAMPQConsumer(threading.Thread):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         parameters = pika.URLParameters(self.BROKER_URL)
-        connection = pika.BlockingConnection(parameters)
-        self.channel = connection.channel()
+        self.connection = pika.BlockingConnection(parameters)
+        self.channel = self.connection.channel()
         queue_name = f'{self.QUEUE_PREFIX}{socket.gethostname()}'
         self.channel.queue_declare(queue=queue_name, auto_delete=True)
         self.channel.exchange_declare(
@@ -35,4 +35,13 @@ class ThreadedAMPQConsumer(threading.Thread):
         channel.basic_ack(delivery_tag=method.delivery_tag)
 
     def run(self):
-        self.channel.start_consuming()
+        try:
+            self.channel.start_consuming()
+        except KeyboardInterrupt:
+            self.channel.stop_consuming()
+        finally:
+            self.connection.close()
+
+    def stop(self):
+        self.channel.stop_consuming()
+        self.connection.close()

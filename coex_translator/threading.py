@@ -22,8 +22,6 @@ class ThreadedAMPQConsumer(threading.Thread):
         self.channel.queue_declare(queue=queue_name, auto_delete=True)
         self.channel.exchange_declare(
             exchange=self.EXCHANGE,
-            exchange_type=pika.exchange_type.ExchangeType.direct,
-            passive=True,
             auto_delete=True
         )
         self.channel.queue_bind(queue=queue_name, exchange=self.EXCHANGE, routing_key=self.ROUTING_KEY)

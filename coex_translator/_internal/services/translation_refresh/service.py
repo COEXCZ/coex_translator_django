@@ -26,7 +26,7 @@ class TranslationRefreshService:
 
     def _save_translations(self, translations: list[schemas.Translation]) -> None:
         cache: BaseCache = caches[settings.DJANGO_CACHE_TRANSLATIONS]
-        cache_dict = {self._get_translation_cache_key(tr): tr.translation for tr in translations}
+        cache_dict: dict[str, str] = {self._get_translation_cache_key(tr): tr.translation for tr in translations}
         cache.set_many(cache_dict, timeout=None)
 
     def _get_translations(self, language: str) -> list[schemas.Translation]:

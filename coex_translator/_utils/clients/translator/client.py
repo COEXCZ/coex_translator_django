@@ -10,11 +10,16 @@ from coex_translator._utils.clients.translator import schemas
 class TranslatorClient(base.BaseAuthHttpClient):
     base_url: typing.ClassVar[str] = settings.COEX_TRANSLATOR_API_BASE_URL
 
-    def fetch_translations(self, translated: bool = True) -> list[schemas.TranslationResponseSchema]:
+    def fetch_translations(
+            self,
+            translated: bool = True,
+            language: str = None,
+    ) -> list[schemas.TranslationResponseSchema]:
         resp: requests.Response = self._send_get_request(
             url=f"{self.base_url}/translation",
             data=schemas.TranslationsRequestFilterSchema(
                 is_translated=translated,
+                language=language,
                 limit=999999,  # TODO allow limit=None in the Translator API?
             ).dict()
         )

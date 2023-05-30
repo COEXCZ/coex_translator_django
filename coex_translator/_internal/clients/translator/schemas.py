@@ -2,7 +2,7 @@ import dataclasses
 
 from django.conf import settings
 
-from coex_translator._utils.clients import base
+from coex_translator._internal.clients import base
 
 
 @dataclasses.dataclass(kw_only=True)

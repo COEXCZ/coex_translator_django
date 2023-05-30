@@ -3,8 +3,8 @@ import typing
 import requests
 from django.conf import settings
 
-from coex_translator._utils.clients import base
-from coex_translator._utils.clients.translator import schemas
+from coex_translator._internal.clients import base
+from coex_translator._internal.clients.translator import schemas
 
 
 class TranslatorClient(base.BaseAuthHttpClient):

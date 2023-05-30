@@ -4,8 +4,8 @@ import logging
 from django.conf import settings
 from django.core.cache import caches, BaseCache
 
-from coex_translator._utils import storage, clients
-from coex_translator._utils.services.translation_refresh import schemas
+from coex_translator._internal import storage, clients
+from coex_translator._internal.services.translation_refresh import schemas
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +15,7 @@ class TranslationRefreshService:
         """Refreshes translations for the given languages and saves them to local cache."""
         if languages is None:
             languages = settings.LANGUAGES
+        logger.info(f"Refreshing translations for {languages=}.")
 
         translations: list[schemas.Translation] = []
         for language in languages:

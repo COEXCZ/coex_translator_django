@@ -4,8 +4,8 @@ import logging
 from django.conf import settings
 from django.core.cache import caches, BaseCache
 
-from coex_translator._internal import storage, clients
-from coex_translator._internal.services.translation_refresh import schemas
+from coex_translator.internal import storage, clients
+from coex_translator.internal.services.translation_refresh import schemas
 
 logger = logging.getLogger(__name__)
 
@@ -24,21 +24,29 @@ class TranslationRefreshService:
         self._save_translations(translations)
         return translations
 
+    def _get_translations(self, language: str) -> list[schemas.Translation]:
+        # Try to load the translations from Object storage.
+        try:
+            return self._get_storage_translations(language)
+        except Exception as e:
+            logger.error(
+                f"Unable to download translations for language `{language} from the storage. "
+                f"Fetching from Translator service.",
+                extra={
+                    'error': str(e)
+                }
+            )
+        # As a backup, try to fetch them from the Translator service.
+        return self._get_translator_translations(language)
+
     def _save_translations(self, translations: list[schemas.Translation]) -> None:
+        """Save translations to the cache, so they can start being used."""
         cache: BaseCache = caches[settings.DJANGO_CACHE_TRANSLATIONS]
         cache_dict: dict[str, str] = {self._get_translation_cache_key(tr): tr.translation for tr in translations}
         cache.set_many(cache_dict, timeout=None)
 
-    def _get_translations(self, language: str) -> list[schemas.Translation]:
-        # First, try to load the translations from Object storage.
-        translations = self._get_storage_translations(language)
-        if translations:
-            return translations
-        # Second, as a backup, try to fetch them from the Translator service.
-        logger.warning(f"Translations for `{language}` not found in the Storage. Fetching from Translator service.")
-        return self._get_translator_translations(language)
-
     def _get_storage_translations(self, language: str) -> list[schemas.Translation] | None:
+        """Download translations from the Object storage."""
         translations_file: bytes = storage.S3Storage().download(self._get_storage_path(language))
         if not translations_file:  # TODO test what happens if does not exist or is empty
             return
@@ -46,6 +54,7 @@ class TranslationRefreshService:
         return [schemas.Translation(**tr) for tr in translations]
 
     def _get_translator_translations(self, language: str) -> list[schemas.Translation]:
+        """Fetch translations from the Translator service."""
         fetched_translations = clients.TranslatorClient().fetch_translations(language=language)
         translations: list[schemas.Translation] = []
         for fetched_trans in fetched_translations:

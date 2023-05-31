@@ -3,7 +3,7 @@ import atexit
 from django.apps import AppConfig
 from django.conf import settings
 
-from coex_translator._internal.services.translation_refresh import TranslationRefreshService
+from coex_translator.internal.services.translation_refresh import TranslationRefreshService
 
 
 class CoexTranslatorConfig(AppConfig):

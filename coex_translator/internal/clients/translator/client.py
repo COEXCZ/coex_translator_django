@@ -3,11 +3,11 @@ import typing
 import requests
 from django.conf import settings
 
-from coex_translator._internal.clients import base
-from coex_translator._internal.clients.translator import schemas
+from coex_translator.internal.clients import base
+from coex_translator.internal.clients.translator import schemas
 
 
-class TranslatorClient(base.BaseAuthHttpClient):
+class TranslatorClient(base.BaseAuthHttpClient):  # TODO set up auth token?
     base_url: typing.ClassVar[str] = settings.COEX_TRANSLATOR_API_BASE_URL
 
     def fetch_translations(

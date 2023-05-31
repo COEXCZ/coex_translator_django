@@ -6,7 +6,7 @@ import uuid
 
 import requests
 
-from coex_translator._internal.clients.base import exceptions
+from coex_translator.internal.clients.base import exceptions
 
 logger = logging.getLogger(__name__)
 HTTPMethodsType = typing.Literal['get', 'post', 'put', 'delete']

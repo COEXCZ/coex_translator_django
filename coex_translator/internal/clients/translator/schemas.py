@@ -2,7 +2,7 @@ import dataclasses
 
 from django.conf import settings
 
-from coex_translator._internal.clients import base
+from coex_translator.internal.clients import base
 
 
 @dataclasses.dataclass(kw_only=True)
@@ -12,7 +12,7 @@ class TranslationsRequestFilterSchema(base.ClientRequestDataSchema):
     is_translated: bool = None
     language: str = None  # language code
     app_name: str = settings.PROJECT_NAME
-    environment: str = settings.ENVIRONMENT  # TODO add this filter in the translator app
+    environment: str = settings.ENVIRONMENT  # TODO add this filter in the translator app endpoint
     offset: int = 0
     limit: int = 100
 

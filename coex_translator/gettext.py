@@ -1,20 +1,36 @@
+import logging
+
+import django.template
+import django.utils
+
 from django.conf import settings
 from django.core.cache import caches
-import django.utils.translation
-import django.template.base
+from django.utils import translation
 
 
-def gettext(message):
+logger = logging.getLogger(__name__)
+
+
+def get_trans(message: str) -> str:
     cache = caches[settings.DJANGO_CACHE_TRANSLATIONS]
     language = django.utils.translation.get_language()
     cache_key = f'{language}:{message}'
+
     if not language:
         return message  # Translations are disabled for some reason
+
     trans = cache.get(cache_key)
+
     if not trans:
         trans = django.utils.translation._trans.gettext(message)
         if trans != message:
             cache.set(cache_key, trans, timeout=60)
+
+    return trans or message
+
+
+def gettext(message):
+    trans = get_trans(message=message)
     return trans or message
 
 

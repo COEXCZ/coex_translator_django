@@ -9,8 +9,10 @@ class CoexTranslatorConfig(AppConfig):
     name = 'coex_translator'
 
     def ready(self):
-        from . import gettext
         from coex_translator.consumer import ThreadedTranslationAMQPConsumer
+        from coex_translator.gettext import monkeypatch_translations
+
+        monkeypatch_translations()
 
         if settings.TRANSLATION_AMQP_CONSUMER_DAEMON_ENABLED:
             translation_consumer = ThreadedTranslationAMQPConsumer(daemon=True)

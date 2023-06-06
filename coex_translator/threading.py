@@ -63,4 +63,3 @@ class ThreadedAMPQConsumer(threading.Thread):
     def stop(self):
         self._connection.ioloop.stop()
         self._channel.close()
-        print('closing')

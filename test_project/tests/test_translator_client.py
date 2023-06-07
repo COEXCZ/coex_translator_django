@@ -16,13 +16,21 @@ class MockResponse:
     def json(self) -> dict:
         return self.data
 
+    @property
+    def text(self) -> str:
+        return str(self.data)
+
+    @property
+    def ok(self) -> bool:
+        return self.status_code < 400
+
 
 class TranslatorClientTestCase(TestCase):
     def setUp(self):
         self.trans_client = TranslatorClient()
 
     def test_fetch_translations(self):
-        fixture_data: list[dict] = load_fixture('translator/translation_response.json')
+        fixture_data: list[dict] = load_fixture('translator_service/translations_response.json')
         mock_resp = MockResponse(data=fixture_data)
         with mock.patch('requests.request', return_value=mock_resp) as request_mock:
             translations = self.trans_client.fetch_translations()
@@ -35,8 +43,8 @@ class TranslatorClientTestCase(TestCase):
                 },
                 params={
                     'is_translated': True,
-                    'language': None,
                     'limit': 999999,
+                    'offset': 0,
                     'app_name': settings.PROJECT_NAME,
                     'environment': settings.ENVIRONMENT,
                 },
@@ -46,7 +54,7 @@ class TranslatorClientTestCase(TestCase):
 
     def test_fetch_translations_bad_response_raises_the_client_exception(self):
         mock_resp = MockResponse(data="Bad response", status_code=400)
-        with mock.patch.object(self.trans_client, '_send_get_request', return_value=mock_resp):
+        with mock.patch('requests.request', return_value=mock_resp):
             with self.assertRaises(self.trans_client.exception_cls):
                 self.trans_client.fetch_translations()
 

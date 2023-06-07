@@ -1,17 +1,27 @@
+import dataclasses
 import io
 import typing
 
 import boto3
+import botocore.exceptions
 from django.conf import settings
 
 
 class S3Storage:
+    class ConnectionError(Exception):
+        pass
+
+    @dataclasses.dataclass
+    class ObjectNotFoundError(Exception):
+        msg: str
+        path: str
+
     def __init__(
             self,
             access_key_id: str = settings.COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ACCESS_KEY_ID,
             secret_access_key: str = settings.COEX_TRANSLATOR_TRANSLATIONS_STORAGE_SECRET_ACCESS_KEY,
             region_name: str = settings.COEX_TRANSLATOR_TRANSLATIONS_STORAGE_REGION_NAME,
-            endpoint_url: str = settings.COEX_TRANSLATOR_TRANSLATIONS_STORAGE_BUCKET_NAME,
+            endpoint_url: str = settings.COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ENDPOINT_URL,
     ):
         self.access_key_id = access_key_id
         self.secret_access_key = secret_access_key
@@ -55,13 +65,19 @@ class S3Storage:
         Download object from S3 bucket.
         :param origin: A full path to the object in the bucket. Example: 'translations/translations.json'.
         :param bucket_name: The name of the bucket to download from.
+        :raises: ConnectionError if the object is not found on given origin path.
         """
         buffer = io.BytesIO()
-        self.client.download_fileobj(
-            Bucket=bucket_name,
-            Key=origin,
-            Fileobj=buffer,
-        )
+        try:
+            self.client.download_fileobj(
+                Bucket=bucket_name,
+                Key=origin,
+                Fileobj=buffer,
+            )
+        except botocore.exceptions.ClientError as e:
+            if e.response.get('Error', {}).get("Code") == "404":
+                raise self.ObjectNotFoundError(f"Object not found on path {origin}.", path=origin)
+            raise self.ConnectionError(str(e))
         return buffer.getvalue()
 
     @property

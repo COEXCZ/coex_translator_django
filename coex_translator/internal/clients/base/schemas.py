@@ -18,4 +18,9 @@ class ClientRequestDataSchema(BaseClientDataSchema):
 
 @dataclasses.dataclass(kw_only=True)
 class ClientResponseDataSchema(BaseClientDataSchema):
-    pass
+
+    @classmethod
+    def build(cls, data: dict[str, typing.Any]) -> typing.Self:
+        """Builds a schema from the response data."""
+        return cls(**data)
+

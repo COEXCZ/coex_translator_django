@@ -28,12 +28,19 @@ class TranslationRefreshService:
         # Try to load the translations from Object storage.
         try:
             return self._get_storage_translations(language)
-        except Exception as e:
+        except storage.S3Storage.ConnectionError as e:
             logger.error(
                 f"Unable to download translations for language `{language} from the storage. "
                 f"Fetching from Translator service.",
                 extra={
-                    'error': str(e)
+                    'error': str(e),
+                }
+            )
+        except storage.S3Storage.ObjectNotFoundError as e:
+            logger.error(
+                f"Translations for language `{language}` not found in the storage. Fetching from Translator service.",
+                extra={
+                    'path': e.path,
                 }
             )
         # As a backup, try to fetch them from the Translator service.
@@ -46,11 +53,12 @@ class TranslationRefreshService:
         cache.set_many(cache_dict, timeout=None)
 
     def _get_storage_translations(self, language: str) -> list[schemas.Translation] | None:
-        """Download translations from the Object storage."""
+        """
+        Download translations from the Object storage.
+        :raises: ConnectionError if the download fails.
+        """
         translations_file: bytes = storage.S3Storage().download(self._get_storage_path(language))
-        if not translations_file:  # TODO test what happens if does not exist or is empty
-            return
-        translations: list[dict] = json.loads(str(translations_file))
+        translations: list[dict] = json.loads(translations_file.decode())
         return [schemas.Translation(**tr) for tr in translations]
 
     def _get_translator_translations(self, language: str) -> list[schemas.Translation]:

@@ -99,6 +99,12 @@ translation AMQP consumer will touch this file when new version is published fro
 This will start translation AMQP consumer daemon in background of main worker process.
 Consumer will fetch and set new translations in cache when new version is published from COex Translator.
 
+```diff
+COEX_TRANSLATOR_STARTUP_TRANSLATIONS_REFRESH_ENABLED = True
+```
+To enable translations refresh on app worker startup.
+
+
 ## Contribution
 
 Install with dev dependencies

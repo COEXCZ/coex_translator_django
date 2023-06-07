@@ -15,7 +15,7 @@ services:
     ports:
       - "8000:8000"
     networks:
-      - coex_translator_test
+      - coex_translator
     depends_on:
       - rabbitmq
 
@@ -26,9 +26,10 @@ services:
       RABBITMQ_DEFAULT_PASS: coex_translator_test
       RABBITMQ_DEFAULT_VHOST: coex_translator_test
     networks:
-      - coex_translator_test
+      - coex_translator
     ports:
       - "15672:15672"
 
 networks:
-  coex_translator_test:
+  coex_translator:
+    external: true

@@ -23,4 +23,5 @@ class CoexTranslatorConfig(AppConfig):
             #  To gracefully stop daemon thread on exit (close connection to AMQP broker)
             atexit.register(translation_consumer.stop)
 
-        TranslationRefreshService().refresh_translations()
+        if settings.COEX_TRANSLATOR_STARTUP_TRANSLATIONS_REFRESH_ENABLED:
+            TranslationRefreshService().refresh_translations()

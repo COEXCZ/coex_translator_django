@@ -5,9 +5,6 @@ description = ""
 authors = ["Your Name <you@example.com>"]
 readme = "README.md"
 packages = [{include = "coex_translator"}]
-exclude = [
-    "coex_translator/internal",  # excluded from package; https://python-poetry.org/docs/pyproject/#include-and-exclude
-]
 
 [tool.poetry.dependencies]
 python = ">=3.10 <4"

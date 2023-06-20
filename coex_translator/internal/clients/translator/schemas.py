@@ -46,3 +46,19 @@ class TranslationResponseSchema(base.ClientResponseDataSchema):
             language=data['language'],
             translation=data['translation'],
         )
+
+
+@dataclasses.dataclass(kw_only=True)
+class ExportMessagesMetaSchema:
+    branch_name: str | None = None
+    tag_id: str | None = None
+    commit_id: str | None = None
+
+
+@dataclasses.dataclass(kw_only=True)
+class ExportMessagesRequestSchema(base.ClientRequestDataSchema):
+    messages: dict[str, str | None]  # key: translation
+    meta: ExportMessagesMetaSchema | None
+    language: str = settings.LANGUAGE_CODE
+    environment: str = settings.ENVIRONMENT
+    app_name: str = settings.PROJECT_NAME

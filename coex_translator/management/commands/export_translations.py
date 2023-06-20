@@ -7,6 +7,8 @@ import requests
 from django.core.management import BaseCommand, call_command
 from django.conf import settings
 
+from coex_translator.internal import clients
+
 
 class Command(BaseCommand):
     def __init__(self, *args, **kwargs):
@@ -22,6 +24,11 @@ class Command(BaseCommand):
             nargs='?',
             default=''
         )
+        parser.add_argument(
+            'tag_id',
+            nargs='?',
+            default='',
+        )
         return parser
 
     def handle(self, *args, **options):
@@ -32,7 +39,7 @@ class Command(BaseCommand):
 
         call_command('makemessages', locale=[settings.LANGUAGE_CODE])
 
-        messages = set()
+        messages: set[str] = set()  # message ids
         for locale_path in settings.LOCALE_PATHS:
             po_file_path_pattern = os.path.join(locale_path, settings.LANGUAGE_CODE, 'LC_MESSAGES', '*.po')
             po_files = glob.glob(po_file_path_pattern)
@@ -40,16 +47,10 @@ class Command(BaseCommand):
                 with open(file_path) as file:
                     result = self.msg_regex.findall(file.read())
                 messages = messages.union(set(result))
-        body = {
-            'messages': {msg: None for msg in messages},  # None is the default translation (We don't have it on BE)
-            'app_name': settings.PROJECT_NAME,
-            'meta': {
-                'branch_name': options['branch_name'],
-                'commit_id': options.get('commit_id', None)
-            }
-        }
 
-        requests.post(
-            f'{settings.COEX_TRANSLATOR_API_BASE_URL}/message/import/',
-            json=body
+        clients.TranslatorClient().export_messages(
+            message_ids=list(messages),
+            branch_name=options['branch_name'],
+            tag_id=options['tag_id'],
+            commit_id=options['commit_id'],
         )

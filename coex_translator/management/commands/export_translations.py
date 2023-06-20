@@ -1,10 +1,11 @@
 import glob
+import json
 import re
 import os
 
 import requests
 
-from django.core.management import BaseCommand, call_command
+from django.core.management import BaseCommand, call_command, CommandError
 from django.conf import settings
 
 from coex_translator.internal import clients
@@ -25,6 +26,12 @@ class Command(BaseCommand):
             default=''
         )
         parser.add_argument(
+            'file_path',
+            help="If provided, exports json file with the translations to given path. Should be a full path.",
+            nargs='?',
+            default='',
+        )
+        parser.add_argument(
             'tag_id',
             nargs='?',
             default='',
@@ -34,10 +41,15 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # TODO: check if COEX_TRANSLATOR_API_BASE_URL is set in settings
         # TODO: check if COEX_TRANSLATOR_API_TOKEN is set in settings
-
         # TODO: make sure all settings.LOCALE_PATHS exist
 
+        export_file_path: str = options.pop('file_path', '')
+        if export_file_path and export_file_path.split('.')[-1] != 'json':
+            raise CommandError('Export file must be a json file. Did you forget to specify the file name or extension?')
+
         call_command('makemessages', locale=[settings.LANGUAGE_CODE])
+        if not export_file_path:
+            return
 
         messages: set[str] = set()  # message ids
         for locale_path in settings.LOCALE_PATHS:
@@ -48,9 +60,5 @@ class Command(BaseCommand):
                     result = self.msg_regex.findall(file.read())
                 messages = messages.union(set(result))
 
-        clients.TranslatorClient().export_messages(
-            message_ids=list(messages),
-            branch_name=options['branch_name'],
-            tag_id=options['tag_id'],
-            commit_id=options['commit_id'],
-        )
+            with open(export_file_path, "w") as f:
+                f.write(json.dumps({message: None for message in messages}))

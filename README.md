@@ -45,7 +45,7 @@ CACHES = {
 }
 ```
 
-Set COex Translator API base URL.
+Set COex Translator API base URL
 
 ```diff
 COEX_TRANSLATOR_API_BASE_URL = config('COEX_TRANSLATOR_API_BASE_URL', default='')
@@ -78,6 +78,15 @@ and set
 ```diff
 COEX_TRANSLATOR_UVICORN_RELOAD_FILE_PATH = <path>/__init__.py
 ```
+and translations storage settings
+```diff
++ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ACCESS_KEY_ID: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ACCESS_KEY_ID', default='')
++ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_SECRET_ACCESS_KEY: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_SECRET_ACCESS_KEY', default='')
++ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_REGION_NAME: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_REGION_NAME', default='')
++ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ENDPOINT_URL: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ENDPOINT_URL', default='')
++ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_BUCKET_NAME: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_BUCKET_NAME', default='')
++ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_FOLDER: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_FOLDER', default='translations')
+```
 
 translation AMQP consumer will touch this file when new version is published from COex Translator.
 
@@ -89,6 +98,12 @@ translation AMQP consumer will touch this file when new version is published fro
 
 This will start translation AMQP consumer daemon in background of main worker process.
 Consumer will fetch and set new translations in cache when new version is published from COex Translator.
+
+```diff
+COEX_TRANSLATOR_STARTUP_TRANSLATIONS_REFRESH_ENABLED = True
+```
+To enable translations refresh on app worker startup.
+
 
 ## Contribution
 

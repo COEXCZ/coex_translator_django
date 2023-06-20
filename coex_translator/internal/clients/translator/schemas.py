@@ -13,7 +13,7 @@ class TranslationsRequestFilterSchema(base.ClientRequestDataSchema):
     is_translated: bool = None
     language: str = None  # language code
     app_name: str = settings.PROJECT_NAME
-    environment: str = settings.ENVIRONMENT  # FIXME add this filter in the translator app endpoint
+    environment: str = settings.ENVIRONMENT
     offset: int = 0
     limit: int = 100
 

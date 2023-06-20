@@ -20,7 +20,7 @@ class TranslatorClient(base.BaseAuthHttpClient):  # TODO set up auth token?
             data=schemas.TranslationsRequestFilterSchema(
                 is_translated=translated,
                 language=language,
-                limit=999999,  # TODO discuss: allow limit=None in the Translator API?
+                limit=999999,
             ).dict()
         )
         return [schemas.TranslationResponseSchema.build(d) for d in resp.json()]

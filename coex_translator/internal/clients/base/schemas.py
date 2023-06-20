@@ -7,7 +7,7 @@ class BaseClientDataSchema:
     def dict(self, exclude_none: bool = True) -> dict[str, typing.Any]:
         data = dataclasses.asdict(self)
         if exclude_none:
-            data = {k: v for k, v in dataclasses.asdict(self).items() if v is not None}
+            data = {k: v for k, v in data.items() if v is not None}
         return data
 
 

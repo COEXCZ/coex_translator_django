@@ -3,12 +3,8 @@ import json
 import re
 import os
 
-import requests
-
 from django.core.management import BaseCommand, call_command, CommandError
 from django.conf import settings
-
-from coex_translator.internal import clients
 
 
 class Command(BaseCommand):
@@ -18,21 +14,8 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument(
-            'branch_name',
-        )
-        parser.add_argument(
-            'commit_id',
-            nargs='?',
-            default=''
-        )
-        parser.add_argument(
-            'file_path',
+            '--file_path',
             help="If provided, exports json file with the translations to given path. Should be a full path.",
-            nargs='?',
-            default='',
-        )
-        parser.add_argument(
-            'tag_id',
             nargs='?',
             default='',
         )
@@ -47,10 +30,12 @@ class Command(BaseCommand):
         if export_file_path and export_file_path.split('.')[-1] != 'json':
             raise CommandError('Export file must be a json file. Did you forget to specify the file name or extension?')
 
+        self.stdout.write("Running Django makemessages command...")
         call_command('makemessages', locale=[settings.LANGUAGE_CODE])
         if not export_file_path:
             return
 
+        self.stdout.write(f"Exporting messages into {export_file_path}...")
         messages: set[str] = set()  # message ids
         for locale_path in settings.LOCALE_PATHS:
             po_file_path_pattern = os.path.join(locale_path, settings.LANGUAGE_CODE, 'LC_MESSAGES', '*.po')
@@ -60,5 +45,6 @@ class Command(BaseCommand):
                     result = self.msg_regex.findall(file.read())
                 messages = messages.union(set(result))
 
-            with open(export_file_path, "w") as f:
-                f.write(json.dumps({message: None for message in messages}))
+        with open(export_file_path, "w") as f:
+            f.write(json.dumps({message: None for message in messages}))
+        self.stdout.write(f"Done. {len(messages)} exported to {export_file_path} file.")

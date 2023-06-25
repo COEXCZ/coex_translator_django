@@ -18,26 +18,23 @@ cache = caches[settings.DJANGO_CACHE_TRANSLATIONS]
 class TranslationRefreshServiceTestCase(TestCase):
     def setUp(self):
         self.service = translation_refresh.TranslationRefreshService()
-        self.translation = translation_refresh.Translation(
-            message='hello-world',
-            translation="Hello world",
-            language='en',
-        )
+        self.language = "en"
+        self.translation = {"hello-world": "Hello world"}
 
         # Translation as would-be downloaded from the storage.
-        self.translation_as_download = bytes(json.dumps([self.translation.__dict__]).encode('utf-8'))
+        self.translation_as_download = bytes(json.dumps(self.translation).encode('utf-8'))
         # Translation as would-be returned by the Translator service.
         self.translation_as_translator_resp = TranslationResponseSchema(
             id=1,
             message=TranslationResponseMessageSchema(
                 id=1,
-                key=self.translation.message,
+                key=list(self.translation.keys())[0],
             ),
-            language=self.translation.language,
-            translation=self.translation.translation,
+            language=self.language,
+            translation=list(self.translation.values())[0],
         )
 
-        activate_lang(self.translation.language)
+        activate_lang(self.language)
 
     def tearDown(self) -> None:
         cache.clear()
@@ -48,12 +45,12 @@ class TranslationRefreshServiceTestCase(TestCase):
 
         with mock.patch.object(S3Storage, 'download', return_value=self.translation_as_download) as download_mock:
             with mock.patch.object(TranslatorClient, 'fetch_translations') as translator_service_call_mock:
-                self.service.refresh_translations(languages=[self.translation.language])
+                self.service.refresh_translations(languages=[self.language])
         download_mock.assert_called_once_with(
             f"{settings.COEX_TRANSLATOR_TRANSLATIONS_STORAGE_FOLDER}/"
             f"{settings.ENVIRONMENT}/"
             f"{settings.PROJECT_NAME}/"
-            f"{self.translation.language}/"
+            f"{self.language}/"
             f"translations.json"
         )
         translator_service_call_mock.assert_not_called()  # should be called only as a backup if the storage fails
@@ -69,9 +66,9 @@ class TranslationRefreshServiceTestCase(TestCase):
                     'fetch_translations',
                     return_value=[self.translation_as_translator_resp],
             ) as translator_service_call_mock:
-                self.service.refresh_translations(languages=[self.translation.language])
+                self.service.refresh_translations(languages=[self.language])
         download_mock.assert_called_once()
-        translator_service_call_mock.assert_called_once_with(language=self.translation.language)
+        translator_service_call_mock.assert_called_once_with(language=self.language)
         self._check_is_translated()
 
     def test_raises_exception_if_both_storage_and_translator_service_fail(self):
@@ -80,14 +77,14 @@ class TranslationRefreshServiceTestCase(TestCase):
         with mock.patch.object(S3Storage, 'download', side_effect=S3Storage.ConnectionError) as download_mock:
             with mock.patch.object(TranslatorClient, 'fetch_translations', side_effect=Exception) as translator_mock:
                 with self.assertRaises(Exception):  # TODO maybe create a custom exception for this case?
-                    self.service.refresh_translations(languages=[self.translation.language])
+                    self.service.refresh_translations(languages=[self.language])
         download_mock.assert_called_once()
         translator_mock.assert_called_once()
         self._check_is_translated(False)
 
     def _check_is_translated(self, expected: bool = True, key: str = None):
         if key is None:
-            key = self.translation.message
-        exp_value = self.translation.translation if expected else key
-        self.assertEqual(gettext(self.translation.message), exp_value)
+            key = list(self.translation.keys())[0]
+        exp_value = list(self.translation.values())[0] if expected else key
+        self.assertEqual(gettext(key), exp_value)
 

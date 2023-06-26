@@ -64,13 +64,12 @@ class TranslationRefreshService:
         """
         translations_file: bytes = storage.S3Storage().download(self._get_storage_path(language))
         translations: TranslationsType = json.loads(translations_file.decode())
-        return translations
+        return {msg_key: trans for msg_key, trans in translations.items() if trans is not None}
 
     def _get_translator_translations(self, language: LangCodeStr) -> TranslationsType:
         """Fetch translations from the Translator service."""
         fetched_translations = clients.TranslatorClient().fetch_translations(language=language)
-        # TODO discuss with MK: If None, set to empty str. Or should be handled differently?
-        return {t.message.key: t.translation or "" for t in fetched_translations}
+        return {t.message.key: t.translation for t in fetched_translations if t.translation is not None}
 
     @classmethod
     def _get_storage_path(cls, language: LangCodeStr) -> str:

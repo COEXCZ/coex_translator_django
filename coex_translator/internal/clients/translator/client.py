@@ -25,5 +25,29 @@ class TranslatorClient(base.BaseAuthHttpClient):  # TODO set up auth token?
         )
         return [schemas.TranslationResponseSchema.build(d) for d in resp.json()]
 
+    def export_messages(
+            self,
+            message_ids: list[str],
+            branch_name: str,
+            tag_id: str = None,
+            commit_id: str = None,
+    ) -> None:
+        """
+        Export message keys to the Translator service.
 
-
+        :param message_ids: List of message keys ("msg_id" in po files).
+        :param branch_name: Name of the git branch from which the messages are exported.
+        :param tag_id: ID of the git tag from which the messages are exported.
+        :param commit_id: ID of the git commit from which the messages are exported.
+        """
+        resp: requests.Response = self._send_post_request(
+            url=f"{self.base_url}/message/import/",
+            data=schemas.ExportMessagesRequestSchema(
+                messages={msg: None for msg in message_ids},  # None is the default translation (We don't have it on BE)
+                meta=schemas.ExportMessagesMetaSchema(
+                    branch_name=branch_name,
+                    tag_id=tag_id,
+                    commit_id=commit_id,
+                ),
+            ).dict(),
+        )

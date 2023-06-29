@@ -44,9 +44,7 @@ def _deep_update(source: dict, overrides: dict) -> dict:
     return source
 
 
-def _load_with_defaults() -> "CoexTranslatorSettings":
-    translator_settings: "CoexTranslatorSettings" = getattr(django_settings, SETTINGS_NAME, {})
-
+def _load_with_defaults(translator_settings: "CoexTranslatorSettings") -> "CoexTranslatorSettings":
     defaults: "CoexTranslatorSettings" = {
         "STARTUP_REFRESH_ENABLED": False,
         "AMQP": {
@@ -63,4 +61,4 @@ def _load_with_defaults() -> "CoexTranslatorSettings":
     return translator_settings
 
 
-app_settings: "CoexTranslatorSettings" = _load_with_defaults()
+app_settings: "CoexTranslatorSettings" = _load_with_defaults(getattr(django_settings, SETTINGS_NAME, {}))

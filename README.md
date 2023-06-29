@@ -60,8 +60,8 @@ COEX_TRANSLATOR_AMQP_BROKER_URL = config('COEX_TRANSLATOR_AMQP_BROKER_URL', defa
 ## Deployment
 
 ### Settings
-For up-to-date available settings, see [CoexTranslatorSettings](coex_translator_django/coex_translator/app_settings.py), or their
-usage in the [test_project](coex_translator_django/test_project/settings.py).
+For up-to-date available settings, see [CoexTranslatorSettings](coex_translator/app_settings.py), or their
+usage in the [test_project](test_project/settings.py).
 
 The settings are namespaced under `COEX_TRANSLATOR` key.
 In the project settings, you should have:

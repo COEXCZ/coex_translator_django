@@ -59,6 +59,24 @@ COEX_TRANSLATOR_AMQP_BROKER_URL = config('COEX_TRANSLATOR_AMQP_BROKER_URL', defa
 
 ## Deployment
 
+### Settings
+For up-to-date available settings, see [CoexTranslatorSettings](coex_translator_django/coex_translator/app_settings.py), or their
+usage in the [test_project](coex_translator_django/test_project/settings.py).
+
+The settings are namespaced under `COEX_TRANSLATOR` key.
+In the project settings, you should have:
+```python
+import typing
+
+if typing.TYPE_CHECKING:
+    from coex_translator.app_settings import CoexTranslatorSettings
+
+    
+COEX_TRANSLATOR: "CoexTranslatorSettings" = {
+    ...
+}
+```
+
 ### for k8s deployment (default):  
  
 Setup translation AMQP consumer in pod sidecar container.
@@ -76,16 +94,7 @@ uvicorn worker <app> --reload-dir <path>
 and set
 
 ```diff
-COEX_TRANSLATOR_UVICORN_RELOAD_FILE_PATH = <path>/__init__.py
-```
-and translations storage settings
-```diff
-+ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ACCESS_KEY_ID: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ACCESS_KEY_ID', default='')
-+ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_SECRET_ACCESS_KEY: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_SECRET_ACCESS_KEY', default='')
-+ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_REGION_NAME: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_REGION_NAME', default='')
-+ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ENDPOINT_URL: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ENDPOINT_URL', default='')
-+ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_BUCKET_NAME: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_BUCKET_NAME', default='')
-+ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_FOLDER: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_FOLDER', default='translations')
+COEX_TRANSLATOR['UVICORN_RELOAD_FILE_PATH'] = "<path>/__init__.py"
 ```
 
 translation AMQP consumer will touch this file when new version is published from COex Translator.
@@ -93,14 +102,14 @@ translation AMQP consumer will touch this file when new version is published fro
 ### for other deployments (Docker SWARM):  
 
 ```diff
- TRANSLATION_AMQP_CONSUMER_DAEMON_ENABLED = True
+ COEX_TRANSLATOR['AMQP']['CONSUMER_DAEMON_ENABLED'] = True
 ```
 
 This will start translation AMQP consumer daemon in background of main worker process.
 Consumer will fetch and set new translations in cache when new version is published from COex Translator.
 
 ```diff
-COEX_TRANSLATOR_STARTUP_TRANSLATIONS_REFRESH_ENABLED = True
+COEX_TRANSLATOR['STARTUP_REFRESH_ENABLED']['CONSUMER_DAEMON_ENABLED'] = True
 ```
 To enable translations refresh on app worker startup.
 

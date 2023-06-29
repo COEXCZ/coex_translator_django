@@ -45,37 +45,41 @@ CACHES = {
 }
 ```
 
-Set COex Translator API base URL
-
-```diff
-COEX_TRANSLATOR_API_BASE_URL = config('COEX_TRANSLATOR_API_BASE_URL', default='')
-```
-
-Set AMQP broker url.
-
-```diff
-COEX_TRANSLATOR_AMQP_BROKER_URL = config('COEX_TRANSLATOR_AMQP_BROKER_URL', default='')
-```
-
 ## Deployment
 
 ### Settings
-For up-to-date available settings, see [CoexTranslatorSettings](coex_translator/app_settings.py), or their
-usage in the [test_project](test_project/settings.py).
-
 The settings are namespaced under `COEX_TRANSLATOR` key.
-In the project settings, you should have:
+
+Settings example:
 ```python
 import typing
 
 if typing.TYPE_CHECKING:
     from coex_translator.app_settings import CoexTranslatorSettings
 
+...
     
 COEX_TRANSLATOR: "CoexTranslatorSettings" = {
-    ...
+    "API_BASE_URL": config('COEX_TRANSLATOR_API_BASE_URL', default=''),
+    "UVICORN_RELOAD_FILE_PATH": config('COEX_TRANSLATOR_UVICORN_RELOAD_FILE_PATH', default=''),
+    "STARTUP_REFRESH_ENABLED": config('COEX_TRANSLATOR_STARTUP_REFRESH_ENABLED', default=False, cast=bool),
+    "AMQP": {
+        "BROKER_URL": config('COEX_TRANSLATOR_AMQP_BROKER_URL', default=f"amqp://{PROJECT_NAME}:{PROJECT_NAME}@rabbitmq/{PROJECT_NAME}"),
+        "CONSUMER_DAEMON_ENABLED": config('COEX_TRANSLATOR_AMQP_CONSUMER_DAEMON_ENABLED', default=False, cast=bool),
+    },
+    "STORAGE": {
+        "ACCESS_KEY_ID": config('COEX_TRANSLATOR_STORAGE_ACCESS_KEY_ID', default=''),
+        "SECRET_ACCESS_KEY": config('COEX_TRANSLATOR_STORAGE_SECRET_ACCESS_KEY', default=''),
+        "REGION_NAME": config('COEX_TRANSLATOR_STORAGE_REGION_NAME', default=''),
+        "ENDPOINT_URL": config('COEX_TRANSLATOR_STORAGE_ENDPOINT_URL', default=''),
+        "BUCKET_NAME": config('COEX_TRANSLATOR_STORAGE_BUCKET_NAME', default=''),
+    },
 }
+
+...
 ```
+For up-to-date available settings, see [CoexTranslatorSettings](coex_translator/app_settings.py), or their
+usage in the [test_project](test_project/settings.py).
 
 ### for k8s deployment (default):  
  

@@ -148,7 +148,7 @@ CACHES = {
     }
 }
 
-# TODO fix naming in OW config
+
 COEX_TRANSLATOR: "CoexTranslatorSettings" = {
     "API_BASE_URL": config('COEX_TRANSLATOR_API_BASE_URL', default=''),
     "UVICORN_RELOAD_FILE_PATH": config('COEX_TRANSLATOR_UVICORN_RELOAD_FILE_PATH', default=''),

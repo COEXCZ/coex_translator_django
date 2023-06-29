@@ -4,6 +4,7 @@ from unittest import mock
 from django.conf import settings
 from django.test import TestCase
 
+from coex_translator.app_settings import app_settings
 from coex_translator.internal.clients import TranslatorClient
 from test_project.tests.utils import load_fixture
 
@@ -36,7 +37,7 @@ class TranslatorClientTestCase(TestCase):
             translations = self.trans_client.fetch_translations()
             request_mock.assert_called_once_with(
                 'get',
-                url=f"{settings.COEX_TRANSLATOR_API_BASE_URL}/translation",
+                url=f"{app_settings['API_BASE_URL']}/translation",
                 json={},
                 headers={
                     'X-Authorization': f'Bearer {self.trans_client.token}',

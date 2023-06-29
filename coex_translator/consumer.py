@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from django.conf import settings
+from coex_translator.app_settings import app_settings
 
 from coex_translator.threading import ThreadedAMPQConsumer
 from coex_translator.publisher import TranslationAMQPPublisher
@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 class ThreadedTranslationAMQPConsumer(ThreadedAMPQConsumer):
-    BROKER_URL: str = settings.COEX_TRANSLATOR_AMQP_BROKER_URL
-    QUEUE_PREFIX: str = settings.COEX_TRANSLATOR_AMQP_QUEUE_PREFIX
-    EXCHANGE: str = settings.COEX_TRANSLATOR_AMQP_EXCHANGE
-    ROUTING_KEY: str = settings.COEX_TRANSLATOR_AMQP_ROUTING_KEY
+    BROKER_URL: str = app_settings["AMQP"]["BROKER_URL"]
+    QUEUE_PREFIX: str = app_settings["AMQP"]["QUEUE_PREFIX"]
+    EXCHANGE: str = app_settings["AMQP"]["EXCHANGE"]
+    ROUTING_KEY: str = app_settings["AMQP"]["ROUTING_KEY"]
 
     def on_message(self, body: bytes):
         body = body.decode('utf-8')
@@ -30,6 +30,6 @@ class ThreadedTranslationAMQPConsumer(ThreadedAMPQConsumer):
                 # K8s case
                 # This is a thread running in the sidecar container.
                 # Notify uvicorn in the main app container through volume to restart and fetch new translations.
-                Path(settings.COEX_TRANSLATOR_UVICORN_RELOAD_FILE_PATH).touch()
+                Path(app_settings["UVICORN_RELOAD_FILE_PATH"]).touch()
         else:
-            logger.error('Translation consumer received uknown message', extra={'message_body': body})
+            logger.error('Translation consumer received unknown message', extra={'message_body': body})

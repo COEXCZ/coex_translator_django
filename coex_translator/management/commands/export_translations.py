@@ -6,6 +6,8 @@ import os
 from django.core.management import BaseCommand, call_command, CommandError
 from django.conf import settings
 
+from coex_translator.app_settings import app_settings
+
 
 class Command(BaseCommand):
     def __init__(self, *args, **kwargs):

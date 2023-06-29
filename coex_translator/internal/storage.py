@@ -4,7 +4,8 @@ import typing
 
 import boto3
 import botocore.exceptions
-from django.conf import settings
+
+from coex_translator.app_settings import app_settings
 
 
 class S3Storage:
@@ -18,10 +19,10 @@ class S3Storage:
 
     def __init__(
             self,
-            access_key_id: str = settings.COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ACCESS_KEY_ID,
-            secret_access_key: str = settings.COEX_TRANSLATOR_TRANSLATIONS_STORAGE_SECRET_ACCESS_KEY,
-            region_name: str = settings.COEX_TRANSLATOR_TRANSLATIONS_STORAGE_REGION_NAME,
-            endpoint_url: str = settings.COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ENDPOINT_URL,
+            access_key_id: str = app_settings["STORAGE"]["ACCESS_KEY_ID"],
+            secret_access_key: str = app_settings["STORAGE"]["SECRET_ACCESS_KEY"],
+            region_name: str = app_settings["STORAGE"]["REGION_NAME"],
+            endpoint_url: str = app_settings["STORAGE"]["ENDPOINT_URL"],
     ):
         self.access_key_id = access_key_id
         self.secret_access_key = secret_access_key
@@ -32,7 +33,7 @@ class S3Storage:
             self,
             obj: typing.BinaryIO,
             destination: str,
-            bucket_name: str = settings.COEX_TRANSLATOR_TRANSLATIONS_STORAGE_BUCKET_NAME,
+            bucket_name: str = app_settings["STORAGE"]["BUCKET_NAME"],
             acl: str = "public-read",
             content_type: str = 'application/json',
             extra_args: typing.Optional[dict] = None,
@@ -59,7 +60,7 @@ class S3Storage:
     def download(
             self,
             origin: str,
-            bucket_name: str = settings.COEX_TRANSLATOR_TRANSLATIONS_STORAGE_BUCKET_NAME,
+            bucket_name: str = app_settings["STORAGE"]["BUCKET_NAME"],
     ) -> bytes:
         """
         Download object from S3 bucket.

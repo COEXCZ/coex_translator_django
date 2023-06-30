@@ -157,6 +157,7 @@ COEX_TRANSLATOR: "CoexTranslatorSettings" = {
         "BROKER_URL": config('COEX_TRANSLATOR_AMQP_BROKER_URL', default=f"amqp://{PROJECT_NAME}:{PROJECT_NAME}@rabbitmq/{PROJECT_NAME}"),
         "QUEUE_PREFIX": config('COEX_TRANSLATOR_AMQP_QUEUE_PREFIX', default='translation'),
         "EXCHANGE": config('COEX_TRANSLATOR_AMQP_EXCHANGE', default='translation'),
+        "ROUTING_KEY": config('COEX_TRANSLATOR_AMQP_ROUTING_KEY', default='translation'),
         "CONSUMER_DAEMON_ENABLED": config('COEX_TRANSLATOR_AMQP_CONSUMER_DAEMON_ENABLED', default=False, cast=bool),
     },
     "STORAGE": {
@@ -165,5 +166,6 @@ COEX_TRANSLATOR: "CoexTranslatorSettings" = {
         "REGION_NAME": config('COEX_TRANSLATOR_STORAGE_REGION_NAME', default=''),
         "ENDPOINT_URL": config('COEX_TRANSLATOR_STORAGE_ENDPOINT_URL', default=''),
         "BUCKET_NAME": config('COEX_TRANSLATOR_STORAGE_BUCKET_NAME', default=''),
-    },
+        "FOLDER": config('COEX_TRANSLATOR_STORAGE_FOLDER', default=''),
+    }
 }

@@ -13,7 +13,7 @@ class CoexTranslatorSettings(TypedDict, total=False):
     STORAGE: "_StorageSettings"
 
 
-class _AMQPSettings(TypedDict, total=False):
+class _AMQPSettings(TypedDict):
     """Settings of the AMQP broker."""
     CONSUMER_DAEMON_ENABLED: bool
     BROKER_URL: str
@@ -22,7 +22,7 @@ class _AMQPSettings(TypedDict, total=False):
     ROUTING_KEY: str
 
 
-class _StorageSettings(TypedDict, total=False):
+class _StorageSettings(TypedDict):
     """Settings of the object storage where files with translations are stored."""
     ACCESS_KEY_ID: str
     SECRET_ACCESS_KEY: str
@@ -32,33 +32,6 @@ class _StorageSettings(TypedDict, total=False):
     FOLDER: str  # Folder in the bucket where files with translations are stored
 
 
-def _deep_update(source: dict, overrides: dict) -> dict:
-    """
-    Update a nested dictionary. Modify `source` in place.
-    """
-    for key, value in overrides.items():
-        if isinstance(value, dict) and value:
-            source[key] = _deep_update(source.get(key, {}), value)
-        else:
-            source[key] = overrides[key]
-    return source
-
-
-def _load_with_defaults(translator_settings: "CoexTranslatorSettings") -> "CoexTranslatorSettings":
-    defaults: "CoexTranslatorSettings" = {
-        "STARTUP_REFRESH_ENABLED": False,
-        "AMQP": {
-            "CONSUMER_DAEMON_ENABLED": False,
-            "QUEUE_PREFIX": "translation",
-            "EXCHANGE": "translation",
-            "ROUTING_KEY": "translation",
-        },
-        "STORAGE": {
-            "FOLDER": "translations",
-        },
-    }
-    _deep_update(translator_settings, defaults)
-    return translator_settings
-
-
-app_settings: "CoexTranslatorSettings" = _load_with_defaults(getattr(django_settings, SETTINGS_NAME, {}))
+# Intercepting/loading and using this app's settings like this allows us to set default values for some settings
+# if we ever want that or perform some checks on them.
+app_settings: "CoexTranslatorSettings" = getattr(django_settings, SETTINGS_NAME, {})

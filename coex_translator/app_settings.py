@@ -1,19 +1,19 @@
-from typing import TypedDict
+import typing
 from django.conf import settings as django_settings
 
 SETTINGS_NAME: str = "COEX_TRANSLATOR"
 
 
-class CoexTranslatorSettings(TypedDict, total=False):
+class CoexTranslatorSettings(typing.TypedDict):
     """Settings of the CoexTranslator app."""
     API_BASE_URL: str  # URL to the Translator service API
-    UVICORN_RELOAD_FILE_PATH: str
+    UVICORN_RELOAD_FILE_PATH: typing.NotRequired[str]
     STARTUP_REFRESH_ENABLED: bool  # If True -> when app is reloaded, refresh translations
     AMQP: "_AMQPSettings"
     STORAGE: "_StorageSettings"
 
 
-class _AMQPSettings(TypedDict):
+class _AMQPSettings(typing.TypedDict):
     """Settings of the AMQP broker."""
     CONSUMER_DAEMON_ENABLED: bool
     BROKER_URL: str
@@ -22,7 +22,7 @@ class _AMQPSettings(TypedDict):
     ROUTING_KEY: str
 
 
-class _StorageSettings(TypedDict):
+class _StorageSettings(typing.TypedDict):
     """Settings of the object storage where files with translations are stored."""
     ACCESS_KEY_ID: str
     SECRET_ACCESS_KEY: str

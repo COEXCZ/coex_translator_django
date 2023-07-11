@@ -48,5 +48,6 @@ class Command(BaseCommand):
                 messages = messages.union(set(result))
 
         with open(export_file_path, "w") as f:
-            f.write(json.dumps({message: None for message in messages}))
+            # f.write(json.dumps({message: None for message in messages}))
+            f.write(json.dumps({"test": "testovich"}))  # FIXME just a test - remove, uncomment above
         self.stdout.write(f"Done. {len(messages)} exported to {export_file_path} file.")

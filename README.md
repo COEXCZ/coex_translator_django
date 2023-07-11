@@ -45,19 +45,45 @@ CACHES = {
 }
 ```
 
-Set COex Translator API base URL
-
-```diff
-COEX_TRANSLATOR_API_BASE_URL = config('COEX_TRANSLATOR_API_BASE_URL', default='')
-```
-
-Set AMQP broker url.
-
-```diff
-COEX_TRANSLATOR_AMQP_BROKER_URL = config('COEX_TRANSLATOR_AMQP_BROKER_URL', default='')
-```
-
 ## Deployment
+
+### Settings
+The settings are namespaced under `COEX_TRANSLATOR` key.
+
+Settings example:
+```python
+import typing
+
+if typing.TYPE_CHECKING:
+    from coex_translator.app_settings import CoexTranslatorSettings
+
+...
+    
+COEX_TRANSLATOR: "CoexTranslatorSettings" = {
+    "API_BASE_URL": config('COEX_TRANSLATOR_API_BASE_URL', default=''),
+    "UVICORN_RELOAD_FILE_PATH": config('COEX_TRANSLATOR_UVICORN_RELOAD_FILE_PATH', default=''),
+    "STARTUP_REFRESH_ENABLED": config('COEX_TRANSLATOR_STARTUP_REFRESH_ENABLED', default=False, cast=bool),
+    "AMQP": {
+        "BROKER_URL": config('COEX_TRANSLATOR_AMQP_BROKER_URL', default=f"amqp://{PROJECT_NAME}:{PROJECT_NAME}@rabbitmq/{PROJECT_NAME}"),
+        "QUEUE_PREFIX": config('COEX_TRANSLATOR_AMQP_QUEUE_PREFIX', default='translation'),
+        "EXCHANGE": config('COEX_TRANSLATOR_AMQP_EXCHANGE', default='translation'),
+        "ROUTING_KEY": config('COEX_TRANSLATOR_AMQP_ROUTING_KEY', default='translation'),
+        "CONSUMER_DAEMON_ENABLED": config('COEX_TRANSLATOR_AMQP_CONSUMER_DAEMON_ENABLED', default=False, cast=bool),
+    },
+    "STORAGE": {
+        "ACCESS_KEY_ID": config('COEX_TRANSLATOR_STORAGE_ACCESS_KEY_ID', default=''),
+        "SECRET_ACCESS_KEY": config('COEX_TRANSLATOR_STORAGE_SECRET_ACCESS_KEY', default=''),
+        "REGION_NAME": config('COEX_TRANSLATOR_STORAGE_REGION_NAME', default=''),
+        "ENDPOINT_URL": config('COEX_TRANSLATOR_STORAGE_ENDPOINT_URL', default=''),
+        "BUCKET_NAME": config('COEX_TRANSLATOR_STORAGE_BUCKET_NAME', default=''),
+        "FOLDER": config('COEX_TRANSLATOR_STORAGE_FOLDER', default=''),
+    }
+}
+
+...
+```
+For up-to-date available settings, see [CoexTranslatorSettings](coex_translator/app_settings.py), or their
+usage in the [test_project](test_project/settings.py).
 
 ### for k8s deployment (default):  
  
@@ -76,16 +102,7 @@ uvicorn worker <app> --reload-dir <path>
 and set
 
 ```diff
-COEX_TRANSLATOR_UVICORN_RELOAD_FILE_PATH = <path>/__init__.py
-```
-and translations storage settings
-```diff
-+ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ACCESS_KEY_ID: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ACCESS_KEY_ID', default='')
-+ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_SECRET_ACCESS_KEY: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_SECRET_ACCESS_KEY', default='')
-+ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_REGION_NAME: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_REGION_NAME', default='')
-+ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ENDPOINT_URL: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_ENDPOINT_URL', default='')
-+ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_BUCKET_NAME: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_BUCKET_NAME', default='')
-+ COEX_TRANSLATOR_TRANSLATIONS_STORAGE_FOLDER: str = config('COEX_TRANSLATOR_TRANSLATIONS_STORAGE_FOLDER', default='translations')
+COEX_TRANSLATOR['UVICORN_RELOAD_FILE_PATH'] = "<path>/__init__.py"
 ```
 
 translation AMQP consumer will touch this file when new version is published from COex Translator.
@@ -93,14 +110,14 @@ translation AMQP consumer will touch this file when new version is published fro
 ### for other deployments (Docker SWARM):  
 
 ```diff
- TRANSLATION_AMQP_CONSUMER_DAEMON_ENABLED = True
+ COEX_TRANSLATOR['AMQP']['CONSUMER_DAEMON_ENABLED'] = True
 ```
 
 This will start translation AMQP consumer daemon in background of main worker process.
 Consumer will fetch and set new translations in cache when new version is published from COex Translator.
 
 ```diff
-COEX_TRANSLATOR_STARTUP_TRANSLATIONS_REFRESH_ENABLED = True
+COEX_TRANSLATOR['STARTUP_REFRESH_ENABLED']['CONSUMER_DAEMON_ENABLED'] = True
 ```
 To enable translations refresh on app worker startup.
 

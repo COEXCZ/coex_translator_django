@@ -1,8 +1,8 @@
 import atexit
 
 from django.apps import AppConfig
-from django.conf import settings
 
+from coex_translator.app_settings import app_settings
 from coex_translator.internal.services.translation_refresh import TranslationRefreshService
 
 
@@ -16,12 +16,12 @@ class CoexTranslatorConfig(AppConfig):
 
         monkeypatch_translations()
 
-        if settings.TRANSLATION_AMQP_CONSUMER_DAEMON_ENABLED:
+        if app_settings["AMQP"]["CONSUMER_DAEMON_ENABLED"]:
             translation_consumer = ThreadedTranslationAMQPConsumer(daemon=True)
             translation_consumer.start()
 
             #  To gracefully stop daemon thread on exit (close connection to AMQP broker)
             atexit.register(translation_consumer.stop)
 
-        if settings.COEX_TRANSLATOR_STARTUP_TRANSLATIONS_REFRESH_ENABLED:
+        if app_settings["STARTUP_REFRESH_ENABLED"]:
             TranslationRefreshService().refresh_translations()

@@ -1,8 +1,7 @@
 import pika
 import logging
 
-from django.conf import settings
-
+from coex_translator.app_settings import app_settings
 
 logger = logging.getLogger(__name__)
 
@@ -21,15 +20,15 @@ class TranslationAMQPPublisher:
 
     @classmethod
     def _publish(cls, body: bytes):
-        parameters = pika.URLParameters(settings.COEX_TRANSLATOR_AMQP_BROKER_URL)
+        parameters = pika.URLParameters(app_settings["AMQP"]["BROKER_URL"])
         connection = pika.BlockingConnection(parameters)
         channel = connection.channel()
         channel.exchange_declare(
-            settings.COEX_TRANSLATOR_AMQP_EXCHANGE,
+            app_settings["AMQP"]["EXCHANGE"],
             auto_delete=True
         )
         channel.basic_publish(
-            settings.COEX_TRANSLATOR_AMQP_EXCHANGE,
-            settings.COEX_TRANSLATOR_AMQP_ROUTING_KEY,
+            app_settings["AMQP"]["EXCHANGE"],
+            app_settings["AMQP"]["ROUTING_KEY"],
             body
         )

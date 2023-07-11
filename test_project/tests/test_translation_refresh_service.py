@@ -6,6 +6,7 @@ from django.conf import settings
 from django.test import TestCase
 from django.utils.translation import gettext, activate as activate_lang
 
+from coex_translator.app_settings import app_settings
 from coex_translator.internal.clients import TranslatorClient
 from coex_translator.internal.clients.translator.schemas import TranslationResponseSchema, \
     TranslationResponseMessageSchema
@@ -47,7 +48,7 @@ class TranslationRefreshServiceTestCase(TestCase):
             with mock.patch.object(TranslatorClient, 'fetch_translations') as translator_service_call_mock:
                 self.service.refresh_translations(languages=[self.language])
         download_mock.assert_called_once_with(
-            f"{settings.COEX_TRANSLATOR_TRANSLATIONS_STORAGE_FOLDER}/"
+            f"{app_settings['STORAGE']['FOLDER']}/"
             f"{settings.ENVIRONMENT}/"
             f"{settings.PROJECT_NAME}/"
             f"{self.language}/"

@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.utils.translation import gettext, activate as activate_lang
 
 from coex_translator.app_settings import app_settings
+from coex_translator.internal import constants
 from coex_translator.internal.clients import TranslatorClient
 from coex_translator.internal.clients.translator.schemas import TranslationResponseSchema, \
     TranslationResponseMessageSchema
@@ -50,7 +51,7 @@ class TranslationRefreshServiceTestCase(TestCase):
         download_mock.assert_called_once_with(
             f"{app_settings['STORAGE']['FOLDER']}/"
             f"{settings.ENVIRONMENT}/"
-            f"{settings.PROJECT_NAME}/"
+            f"{constants.APP_NAME}/"
             f"{self.language}/"
             f"translations.json"
         )

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.test import TestCase
 
 from coex_translator.app_settings import app_settings
+from coex_translator.internal import constants
 from coex_translator.internal.clients import TranslatorClient
 from test_project.tests.utils import load_fixture
 
@@ -46,7 +47,7 @@ class TranslatorClientTestCase(TestCase):
                     'is_translated': True,
                     'limit': 999999,
                     'offset': 0,
-                    'app_name': settings.PROJECT_NAME,
+                    'app_name': constants.APP_NAME,
                     'environment': settings.ENVIRONMENT,
                 },
             )

@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.cache import caches, BaseCache
 
 from coex_translator.app_settings import app_settings
-from coex_translator.internal import storage, clients
+from coex_translator.internal import storage, clients, constants
 
 logger = logging.getLogger(__name__)
 TranslationsType = dict[str, str]  # message_key: translation
@@ -76,4 +76,4 @@ class TranslationRefreshService:
     def _get_storage_path(cls, language: LangCodeStr) -> str:
         """Get the path to the JSON file with translations in the Storage."""
         folder: str = app_settings['STORAGE']['FOLDER']
-        return f"{folder}/{settings.ENVIRONMENT}/{settings.PROJECT_NAME}/{language}/translations.json"
+        return f"{folder}/{settings.ENVIRONMENT}/{constants.APP_NAME}/{language}/translations.json"

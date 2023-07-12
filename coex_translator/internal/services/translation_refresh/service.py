@@ -16,7 +16,7 @@ class TranslationRefreshService:
     def refresh_translations(self, languages: list[LangCodeStr] = None) -> dict[LangCodeStr, TranslationsType]:
         """Refreshes translations for the given languages and saves them to local cache."""
         if languages is None:
-            languages = settings.LANGUAGES
+            languages = [code for code, name in settings.LANGUAGES]
         logger.info(f"Refreshing translations for {languages=}.")
 
         translations: dict[LangCodeStr, TranslationsType] = {}

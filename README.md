@@ -121,6 +121,10 @@ COEX_TRANSLATOR['STARTUP_REFRESH_ENABLED']['CONSUMER_DAEMON_ENABLED'] = True
 ```
 To enable translations refresh on app worker startup.
 
+> **Warning**  
+> To ensure that translations work properly even on Model class variables (e.g. `Meta.verbose_name`), call 
+> `coex_translator.gettext.monkeypatch_translations()` in the project's root `__init__.py` file.
+
 
 ## Contribution
 

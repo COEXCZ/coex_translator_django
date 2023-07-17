@@ -2,10 +2,10 @@ import json
 import logging
 
 from django.conf import settings
-from django.core.cache import caches, BaseCache
 
 from coex_translator.app_settings import app_settings
 from coex_translator.internal import storage, clients, constants
+from coex_translator import gettext
 
 logger = logging.getLogger(__name__)
 TranslationsType = dict[str, str]  # message_key: translation
@@ -50,12 +50,11 @@ class TranslationRefreshService:
 
     def _save_translations(self, translations: TranslationsType, language: LangCodeStr) -> None:
         """Save translations to the cache, so they can start being used."""
-        cache: BaseCache = caches[settings.DJANGO_CACHE_TRANSLATIONS]
         cache_dict: dict[str, str] = {
             f"{language}:{message_key}": translation
             for message_key, translation in translations.items()
         }
-        cache.set_many(cache_dict, timeout=None)
+        gettext.cache = cache_dict
 
     def _get_storage_translations(self, language: LangCodeStr) -> TranslationsType:
         """

@@ -3,16 +3,16 @@ import logging
 import django.template
 import django.utils
 
-from django.conf import settings
-from django.core.cache import caches
 from django.utils import translation
 
 
 logger = logging.getLogger(__name__)
 
 
+cache = {}
+
+
 def get_trans(message: str) -> str:
-    cache = caches[settings.DJANGO_CACHE_TRANSLATIONS]
     language = django.utils.translation.get_language()
     cache_key = f'{language}:{message}'
 
@@ -24,7 +24,7 @@ def get_trans(message: str) -> str:
     if not trans:
         trans = django.utils.translation._trans.gettext(message)
         if trans != message:
-            cache.set(cache_key, trans, timeout=60)
+            cache[cache_key] = trans
 
     return trans or message
 

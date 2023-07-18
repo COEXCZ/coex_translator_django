@@ -8,10 +8,10 @@ cache = caches[settings.DJANGO_CACHE_TRANSLATIONS]
 
 class TranslationServiceTestCase(TestCase):
     def setUp(self):
-        self.service = TranslationService
+        self.service = TranslationService()
 
     def test_is_singleton(self):
-        self.assertEqual(id(self.service), id(TranslationService))
+        self.assertEqual(id(self.service), id(TranslationService()))
 
     def test_set(self):
         key, translation, lang = "message-key", "Translated text", "en"
@@ -41,6 +41,13 @@ class TranslationServiceTestCase(TestCase):
 
         self.assertEqual(self.service.get(key, lang), translation_new)
         self.assertEqual(self.service.get(key, lang_other), translation_other_lang)
+
+    def test_is_singleton_so_new_instance_has_translations(self):
+        key, translation, lang = "message-key", "Translated text", "en"
+        self.service.set(key, translation, lang)
+
+        new_instance = TranslationService()
+        self.assertEqual(new_instance.get(key, lang), translation)
 
     def test_set_many(self):
         translations = {

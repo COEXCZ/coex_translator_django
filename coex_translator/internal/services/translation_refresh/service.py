@@ -18,12 +18,13 @@ class TranslationRefreshService:
         if languages is None:
             languages = [code for code, name in settings.LANGUAGES]
         logger.info(f"Refreshing translations for {languages=}.")
+        translation_service = TranslationService()
 
         translations: dict[LangCodeStr, TranslationsType] = {}
         for language in languages:
             language_translations = self._get_translations(language)
             translations[language] = language_translations
-            TranslationService.set_many(translations=language_translations, language=language)
+            translation_service.set_many(translations=language_translations, language=language)
         return translations
 
     def _get_translations(self, language: LangCodeStr) -> TranslationsType:

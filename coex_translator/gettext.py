@@ -12,16 +12,16 @@ logger = logging.getLogger(__name__)
 
 def get_trans(message: str) -> str:
     language = django.utils.translation.get_language()
-
+    translation_service = TranslationService()
     if not language:
         return message  # Translations are disabled for some reason
 
-    trans = TranslationService.get(message, language)
+    trans = translation_service.get(message, language)
 
     if not trans:
         trans = django.utils.translation._trans.gettext(message)
         if trans != message:
-            TranslationService.set(message, translation=trans, language=language)
+            translation_service.set(message, translation=trans, language=language)
 
     return trans or message
 

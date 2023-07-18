@@ -3,6 +3,7 @@ import dataclasses
 import typing
 from django.conf import settings
 
+from coex_translator.internal import constants
 from coex_translator.internal.clients import base
 
 
@@ -12,7 +13,7 @@ class TranslationsRequestFilterSchema(base.ClientRequestDataSchema):
     key: str = None
     is_translated: bool = None
     language: str = None  # language code
-    app_name: str = settings.PROJECT_NAME
+    app_name: str = constants.APP_NAME
     environment: str = settings.ENVIRONMENT
     offset: int = 0
     limit: int = 100

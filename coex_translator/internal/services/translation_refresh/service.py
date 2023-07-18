@@ -2,10 +2,10 @@ import json
 import logging
 
 from django.conf import settings
-from django.core.cache import caches, BaseCache
 
 from coex_translator.app_settings import app_settings
-from coex_translator.internal import storage, clients
+from coex_translator.internal import storage, clients, constants
+from coex_translator.service import TranslationService
 
 logger = logging.getLogger(__name__)
 TranslationsType = dict[str, str]  # message_key: translation
@@ -16,14 +16,15 @@ class TranslationRefreshService:
     def refresh_translations(self, languages: list[LangCodeStr] = None) -> dict[LangCodeStr, TranslationsType]:
         """Refreshes translations for the given languages and saves them to local cache."""
         if languages is None:
-            languages = settings.LANGUAGES
+            languages = [code for code, name in settings.LANGUAGES]
         logger.info(f"Refreshing translations for {languages=}.")
+        translation_service = TranslationService()
 
         translations: dict[LangCodeStr, TranslationsType] = {}
         for language in languages:
             language_translations = self._get_translations(language)
             translations[language] = language_translations
-            self._save_translations(language_translations, language)
+            translation_service.set_many(translations=language_translations, language=language)
         return translations
 
     def _get_translations(self, language: LangCodeStr) -> TranslationsType:
@@ -48,15 +49,6 @@ class TranslationRefreshService:
         # As a backup, try to fetch them from the Translator service.
         return self._get_translator_translations(language)
 
-    def _save_translations(self, translations: TranslationsType, language: LangCodeStr) -> None:
-        """Save translations to the cache, so they can start being used."""
-        cache: BaseCache = caches[settings.DJANGO_CACHE_TRANSLATIONS]
-        cache_dict: dict[str, str] = {
-            f"{language}:{message_key}": translation
-            for message_key, translation in translations.items()
-        }
-        cache.set_many(cache_dict, timeout=None)
-
     def _get_storage_translations(self, language: LangCodeStr) -> TranslationsType:
         """
         Download translations from the Object storage.
@@ -76,4 +68,4 @@ class TranslationRefreshService:
     def _get_storage_path(cls, language: LangCodeStr) -> str:
         """Get the path to the JSON file with translations in the Storage."""
         folder: str = app_settings['STORAGE']['FOLDER']
-        return f"{folder}/{settings.ENVIRONMENT}/{settings.PROJECT_NAME}/{language}/translations.json"
+        return f"{folder}/{settings.ENVIRONMENT}/{constants.APP_NAME}/{language}/translations.json"

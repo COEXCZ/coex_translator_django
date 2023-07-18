@@ -3,28 +3,25 @@ import logging
 import django.template
 import django.utils
 
-from django.conf import settings
-from django.core.cache import caches
 from django.utils import translation
 
+from coex_translator.service import TranslationService
 
 logger = logging.getLogger(__name__)
 
 
 def get_trans(message: str) -> str:
-    cache = caches[settings.DJANGO_CACHE_TRANSLATIONS]
     language = django.utils.translation.get_language()
-    cache_key = f'{language}:{message}'
-
+    translation_service = TranslationService()
     if not language:
         return message  # Translations are disabled for some reason
 
-    trans = cache.get(cache_key)
+    trans = translation_service.get(message, language)
 
     if not trans:
         trans = django.utils.translation._trans.gettext(message)
         if trans != message:
-            cache.set(cache_key, trans, timeout=60)
+            translation_service.set(message, translation=trans, language=language)
 
     return trans or message
 

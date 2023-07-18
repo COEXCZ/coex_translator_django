@@ -7,11 +7,13 @@ from django.test import TestCase
 from django.utils.translation import gettext, activate as activate_lang
 
 from coex_translator.app_settings import app_settings
+from coex_translator.internal import constants
 from coex_translator.internal.clients import TranslatorClient
 from coex_translator.internal.clients.translator.schemas import TranslationResponseSchema, \
     TranslationResponseMessageSchema
 from coex_translator.internal.services import translation_refresh
 from coex_translator.internal.storage import S3Storage
+from coex_translator.service import TranslationService
 
 cache = caches[settings.DJANGO_CACHE_TRANSLATIONS]
 
@@ -38,7 +40,7 @@ class TranslationRefreshServiceTestCase(TestCase):
         activate_lang(self.language)
 
     def tearDown(self) -> None:
-        cache.clear()
+        TranslationService().clear()
 
     def test_refresh_translations_from_the_storage_json_file(self):
         # Check that the message is not translated yet.
@@ -50,7 +52,7 @@ class TranslationRefreshServiceTestCase(TestCase):
         download_mock.assert_called_once_with(
             f"{app_settings['STORAGE']['FOLDER']}/"
             f"{settings.ENVIRONMENT}/"
-            f"{settings.PROJECT_NAME}/"
+            f"{constants.APP_NAME}/"
             f"{self.language}/"
             f"translations.json"
         )

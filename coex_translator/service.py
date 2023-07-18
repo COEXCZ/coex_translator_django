@@ -25,8 +25,10 @@ class TranslationService(metaclass=Singleton):
             self.set(message_key, translation, language)
 
     def get(self, message_key: str, language: LangCodeStr) -> str:
-        """Get the translation for the given language and message key."""
-        # TODO discuss - if settings.LANGUAGE_CODE has translation -> return that instead of the message_key default??
+        """
+        Get the translation for given language and message key.
+        If the translation is not found, return the message key.
+        """
         cache_key = self.get_cache_key(message_key, language)
         return self._TRANSLATIONS.get(cache_key, message_key)
 

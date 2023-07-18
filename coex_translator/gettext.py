@@ -5,26 +5,23 @@ import django.utils
 
 from django.utils import translation
 
+from coex_translator.service import TranslationService
 
 logger = logging.getLogger(__name__)
 
 
-cache = {}
-
-
 def get_trans(message: str) -> str:
     language = django.utils.translation.get_language()
-    cache_key = f'{language}:{message}'
 
     if not language:
         return message  # Translations are disabled for some reason
 
-    trans = cache.get(cache_key)
+    trans = TranslationService.get(message, language)
 
     if not trans:
         trans = django.utils.translation._trans.gettext(message)
         if trans != message:
-            cache[cache_key] = trans
+            TranslationService.set(message, translation=trans, language=language)
 
     return trans or message
 

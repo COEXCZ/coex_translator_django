@@ -5,7 +5,7 @@ from django.conf import settings
 
 from coex_translator.app_settings import app_settings
 from coex_translator.internal import storage, clients, constants
-from coex_translator import gettext
+from coex_translator.service import TranslationService
 
 logger = logging.getLogger(__name__)
 TranslationsType = dict[str, str]  # message_key: translation
@@ -23,7 +23,7 @@ class TranslationRefreshService:
         for language in languages:
             language_translations = self._get_translations(language)
             translations[language] = language_translations
-            self._save_translations(language_translations, language)
+            TranslationService.set_many(translations=language_translations, language=language)
         return translations
 
     def _get_translations(self, language: LangCodeStr) -> TranslationsType:
@@ -47,14 +47,6 @@ class TranslationRefreshService:
             )
         # As a backup, try to fetch them from the Translator service.
         return self._get_translator_translations(language)
-
-    def _save_translations(self, translations: TranslationsType, language: LangCodeStr) -> None:
-        """Save translations to the cache, so they can start being used."""
-        cache_dict: dict[str, str] = {
-            f"{language}:{message_key}": translation
-            for message_key, translation in translations.items()
-        }
-        gettext.cache = cache_dict
 
     def _get_storage_translations(self, language: LangCodeStr) -> TranslationsType:
         """

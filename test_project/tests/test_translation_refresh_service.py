@@ -40,7 +40,7 @@ class TranslationRefreshServiceTestCase(TestCase):
         activate_lang(self.language)
 
     def tearDown(self) -> None:
-        TranslationService.clear()
+        TranslationService().clear()
 
     def test_refresh_translations_from_the_storage_json_file(self):
         # Check that the message is not translated yet.

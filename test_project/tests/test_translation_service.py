@@ -49,6 +49,9 @@ class TranslationServiceTestCase(TestCase):
         new_instance = TranslationService()
         self.assertEqual(new_instance.get(key, lang), translation)
 
+    def test_get_non_existing_translation_returns_none(self):
+        self.assertIsNone(self.service.get("non-existing-key", "en"))
+
     def test_set_many(self):
         translations = {
             "message-key-1": "Translated text 1",

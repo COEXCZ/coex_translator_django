@@ -5,7 +5,6 @@ from coex_translator.singleton import Singleton
 LangCodeStr = str  # 2-letter language code
 
 
-
 class TranslationService(metaclass=Singleton):
     """Singleton service for retrieving/setting translations."""
     _TRANSLATIONS: typing.ClassVar[dict[str, str]] = {}  # {cache_key: translation}
@@ -24,18 +23,17 @@ class TranslationService(metaclass=Singleton):
         for message_key, translation in translations.items():
             self.set(message_key, translation, language)
 
-    def get(self, message_key: str, language: LangCodeStr) -> str:
+    def get(self, message_key: str, language: LangCodeStr) -> str | None:
         """
         Get the translation for given language and message key.
-        If the translation is not found, return the message key.
+        If the translation is not found, returns None.
         """
         cache_key = self.get_cache_key(message_key, language)
-        return self._TRANSLATIONS.get(cache_key, message_key)
+        return self._TRANSLATIONS.get(cache_key)
 
     def clear(self) -> None:
         """Clears the translations."""
         self._TRANSLATIONS.clear()
-
 
     @classmethod
     def get_cache_key(cls, message_key: str, language: LangCodeStr) -> str:

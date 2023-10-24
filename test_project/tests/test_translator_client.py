@@ -47,7 +47,7 @@ class TranslatorClientTestCase(TestCase):
                     'is_translated': True,
                     'limit': 999999,
                     'offset': 0,
-                    'app_name': constants.APP_NAME,
+                    'app_name': constants.BE_APP_NAME,
                     'environment': settings.ENVIRONMENT,
                 },
             )

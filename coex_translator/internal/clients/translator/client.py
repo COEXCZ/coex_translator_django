@@ -3,6 +3,7 @@ import typing
 import requests
 
 from coex_translator.app_settings import app_settings
+from coex_translator.internal import constants
 from coex_translator.internal.clients import base
 from coex_translator.internal.clients.translator import schemas
 
@@ -14,6 +15,7 @@ class TranslatorClient(base.BaseAuthHttpClient):  # TODO set up auth token?
             self,
             translated: bool = True,
             language: str = None,
+            app_name: str = constants.BE_APP_NAME,
     ) -> list[schemas.TranslationResponseSchema]:
         resp: requests.Response = self._send_get_request(
             url=f"{self.base_url}/translation",
@@ -21,6 +23,7 @@ class TranslatorClient(base.BaseAuthHttpClient):  # TODO set up auth token?
                 is_translated=translated,
                 language=language,
                 limit=999999,
+                app_name=app_name,
             ).dict()
         )
         return [schemas.TranslationResponseSchema.build(d) for d in resp.json()]

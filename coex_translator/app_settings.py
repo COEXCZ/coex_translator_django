@@ -9,6 +9,7 @@ class CoexTranslatorSettings(typing.TypedDict):
     API_BASE_URL: str  # URL to the Translator service API
     UVICORN_RELOAD_FILE_PATH: typing.NotRequired[str]
     STARTUP_REFRESH_ENABLED: bool  # If True -> when app is reloaded, refresh translations
+    FETCH_WITH_FE: bool
     AMQP: "_AMQPSettings"
     STORAGE: "_StorageSettings"
 

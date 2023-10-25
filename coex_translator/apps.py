@@ -1,4 +1,5 @@
 import atexit
+import sys
 
 from django.apps import AppConfig
 
@@ -23,5 +24,6 @@ class CoexTranslatorConfig(AppConfig):
             #  To gracefully stop daemon thread on exit (close connection to AMQP broker)
             atexit.register(translation_consumer.stop)
 
-        if app_settings["STARTUP_REFRESH_ENABLED"]:
+        if 'manage.py' not in sys.argv and app_settings["STARTUP_REFRESH_ENABLED"]:
+            #  Refresh translations on startup only for workers (uwsgi, gunicorn, etc.)
             TranslationRefreshService().refresh_translations()

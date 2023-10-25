@@ -13,7 +13,7 @@ class TranslationsRequestFilterSchema(base.ClientRequestDataSchema):
     key: str = None
     is_translated: bool = None
     language: str = None  # language code
-    app_name: str = constants.APP_NAME
+    app_name: str = constants.BE_APP_NAME
     environment: str = settings.ENVIRONMENT
     offset: int = 0
     limit: int = 100

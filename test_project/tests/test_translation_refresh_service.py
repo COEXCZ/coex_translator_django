@@ -52,7 +52,7 @@ class TranslationRefreshServiceTestCase(TestCase):
         download_mock.assert_called_once_with(
             f"{app_settings['STORAGE']['FOLDER']}/"
             f"{settings.ENVIRONMENT}/"
-            f"{constants.APP_NAME}/"
+            f"{constants.BE_APP_NAME}/"
             f"{self.language}/"
             f"translations.json"
         )

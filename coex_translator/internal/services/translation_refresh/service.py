@@ -49,23 +49,35 @@ class TranslationRefreshService:
         # As a backup, try to fetch them from the Translator service.
         return self._get_translator_translations(language)
 
-    def _get_storage_translations(self, language: LangCodeStr) -> TranslationsType:
+    def _get_storage_translations_by_app(self, language: LangCodeStr, app_name: str = constants.BE_APP_NAME) -> TranslationsType:
         """
         Download translations from the Object storage.
         :raises: ObjectNotFoundError if the translation file is not found.
         :raises: ConnectionError if the download fails.
         """
-        translations_file: bytes = storage.S3Storage().download(self._get_storage_path(language))
+        translations_file: bytes = storage.S3Storage().download(self._get_storage_path(language, app_name))
         translations: TranslationsType = json.loads(translations_file.decode())
         return {msg_key: trans for msg_key, trans in translations.items() if trans is not None}
 
-    def _get_translator_translations(self, language: LangCodeStr) -> TranslationsType:
+    def _get_storage_translations(self, language: LangCodeStr) -> TranslationsType:
+        translations = self._get_storage_translations_by_app(language, constants.BE_APP_NAME)
+        if app_settings['FETCH_WITH_FE']:
+            translations.update(self._get_storage_translations_by_app(language, constants.FE_APP_NAME))
+        return translations
+
+    def _get_translator_translations_by_app(self, language: LangCodeStr, app_name: str) -> TranslationsType:
         """Fetch translations from the Translator service."""
         fetched_translations = clients.TranslatorClient().fetch_translations(language=language)
         return {t.message.key: t.translation for t in fetched_translations if t.translation is not None}
 
+    def _get_translator_translations(self, language: LangCodeStr) -> TranslationsType:
+        translations = self._get_translator_translations_by_app(language, constants.BE_APP_NAME)
+        if app_settings['FETCH_WITH_FE']:
+            translations.update(self._get_translator_translations_by_app(language, constants.FE_APP_NAME))
+        return translations
+
     @classmethod
-    def _get_storage_path(cls, language: LangCodeStr) -> str:
+    def _get_storage_path(cls, language: LangCodeStr, app_name: str) -> str:
         """Get the path to the JSON file with translations in the Storage."""
         folder: str = app_settings['STORAGE']['FOLDER']
-        return f"{folder}/{settings.ENVIRONMENT}/{constants.APP_NAME}/{language}/translations.json"
+        return f"{folder}/{settings.ENVIRONMENT}/{app_name}/{language}/translations.json"

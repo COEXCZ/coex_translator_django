@@ -24,6 +24,6 @@ class CoexTranslatorConfig(AppConfig):
             #  To gracefully stop daemon thread on exit (close connection to AMQP broker)
             atexit.register(translation_consumer.stop)
 
-        if 'manage.py' not in sys.argv and app_settings["STARTUP_REFRESH_ENABLED"]:
+        if not {'manage.py', './manage.py'}.intersection(set(sys.argv)) and app_settings["STARTUP_REFRESH_ENABLED"]:
             #  Refresh translations on startup only for workers (uwsgi, gunicorn, etc.)
             TranslationRefreshService().refresh_translations()

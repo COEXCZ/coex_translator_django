@@ -60,5 +60,22 @@ class TranslatorClientTestCase(TestCase):
             with self.assertRaises(self.trans_client.exception_cls):
                 self.trans_client.fetch_translations()
 
-    # TODO test invalid format of the response
+    def test_publish_translations(self):
+        fixture_data: list[dict] = load_fixture('translator_service/publish_translations_response.json')
+        mock_resp = MockResponse(data=fixture_data)
+        with mock.patch('requests.request', return_value=mock_resp) as request_mock:
+            publish_results = self.trans_client.publish_translations('testing')
+            request_mock.assert_called_once_with(
+                'post',
+                url=f"{app_settings['API_BASE_URL']}/translation/publish",
+                json={
+                    'environments': ['testing'],
+                    'app_name': constants.BE_APP_NAME
+                },
+                headers={
+                    'X-Authorization': f'Bearer {self.trans_client.token}',
+                },
+                params={}
+            )
 
+            self.assertEqual(len(publish_results.items), len(fixture_data['items']))

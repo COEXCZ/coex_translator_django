@@ -10,6 +10,7 @@ from coex_translator.internal.clients.translator import schemas
 
 class TranslatorClient(base.BaseAuthHttpClient):  # TODO set up auth token?
     base_url: typing.ClassVar[str] = app_settings["API_BASE_URL"]
+    token: typing.ClassVar[str] = app_settings['API_TOKEN']
 
     def fetch_translations(
             self,
@@ -54,3 +55,19 @@ class TranslatorClient(base.BaseAuthHttpClient):  # TODO set up auth token?
                 ),
             ).dict(),
         )
+
+    def publish_translations(self, environment: str) -> schemas.PublishTranslationsResponseSchema:
+        """
+        Publish translations for given environment.
+
+        :param environment: Name of the environment.
+        """
+        resp: requests.Response = self._send_post_request(
+            url=f"{self.base_url}/translation/publish",
+            data=schemas.PublishTranslationsRequestSchema(
+                environments=[environment],
+                app_name=constants.BE_APP_NAME,
+            ).dict(),
+        )
+
+        return schemas.PublishTranslationsResponseSchema.build(resp.json())

@@ -7,6 +7,7 @@ SETTINGS_NAME: str = "COEX_TRANSLATOR"
 class CoexTranslatorSettings(typing.TypedDict):
     """Settings of the CoexTranslator app."""
     API_BASE_URL: str  # URL to the Translator service API
+    API_TOKEN: str
     UVICORN_RELOAD_FILE_PATH: typing.NotRequired[str]
     STARTUP_REFRESH_ENABLED: bool  # If True -> when app is reloaded, refresh translations
     FETCH_WITH_FE: bool

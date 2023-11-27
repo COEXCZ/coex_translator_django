@@ -50,6 +50,7 @@ class TranslatorClientTestCase(TestCase):
                     'app_name': constants.BE_APP_NAME,
                     'environment': settings.ENVIRONMENT,
                 },
+                timeout=TranslatorClient.timeout
             )
 
         self.assertEqual(len(translations), len(fixture_data))
@@ -75,7 +76,8 @@ class TranslatorClientTestCase(TestCase):
                 headers={
                     'X-Authorization': f'Bearer {self.trans_client.token}',
                 },
-                params={}
+                params={},
+                timeout=TranslatorClient.timeout
             )
 
             self.assertEqual(len(publish_results.items), len(fixture_data['items']))

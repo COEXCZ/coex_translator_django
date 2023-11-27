@@ -1,4 +1,7 @@
 import threading
+import logging
+
+from time import sleep
 
 import pika
 import pika.channel
@@ -7,6 +10,9 @@ import pika.exceptions
 import pika.frame
 
 import socket
+
+
+logger = logging.getLogger(__name__)
 
 
 class ThreadedAMPQConsumer(threading.Thread):
@@ -20,10 +26,30 @@ class ThreadedAMPQConsumer(threading.Thread):
         self.queue_name = f"{self.QUEUE_PREFIX}.{socket.gethostname()}"
         self._connection = None
         self._channel = None
+        self._retries = 0
 
     def on_connection_open(self, connection):
         self._connection = connection
         self._connection.channel(on_open_callback=self.on_channel_open)
+        self._retries = 0
+
+    def _retry_connect(self, connection_error: pika.exceptions.AMQPConnectionError):
+        if self._retries > 3:
+            raise Exception("Too many retries") from connection_error
+
+        countdown = 1 * (10**self._retries)  # (1, 10, 100)
+
+        logger.warning("AMQP Connection error, retrying",
+                       extra={'countdown': countdown, 'retries': self._retries, 'error': str(connection_error)})
+        sleep(countdown)
+
+        self._retries += 1
+        self.connect()
+
+    def on_connection_closed(self, connection: pika.SelectConnection, reason: pika.exceptions.AMQPConnectionError):
+        self._connection = None
+        self._channel = None
+        self._retry_connect(reason)
 
     def on_channel_open(self, channel):
         self._channel = channel
@@ -54,13 +80,21 @@ class ThreadedAMPQConsumer(threading.Thread):
 
     def connect(self):
         parameters = pika.URLParameters(self.BROKER_URL)
-        self._connection = pika.SelectConnection(parameters, on_open_callback=self.on_connection_open)
+        self._connection = pika.SelectConnection(
+            parameters,
+            on_open_callback=self.on_connection_open,
+            on_close_callback=self.on_connection_closed
+        )
         self._connection.ioloop.start()
 
     def run(self):
         self.connect()
 
     def stop(self):
+        if not self._connection:
+            #  Connection is already closed
+            return
+
         self._connection.ioloop.stop()
         if self._channel:
             self._channel.close()

@@ -151,6 +151,7 @@ CACHES = {
 
 COEX_TRANSLATOR: "CoexTranslatorSettings" = {
     "API_BASE_URL": config('COEX_TRANSLATOR_API_BASE_URL', default=''),
+    "API_TOKEN": config('COEX_TRANSLATOR_API_TOKEN', default=''),
     "UVICORN_RELOAD_FILE_PATH": config('COEX_TRANSLATOR_UVICORN_RELOAD_FILE_PATH', default=''),
     "STARTUP_REFRESH_ENABLED": config('COEX_TRANSLATOR_STARTUP_REFRESH_ENABLED', default=False, cast=bool),
     'FETCH_WITH_FE': False,

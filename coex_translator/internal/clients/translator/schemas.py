@@ -63,3 +63,35 @@ class ExportMessagesRequestSchema(base.ClientRequestDataSchema):
     language: str = settings.LANGUAGE_CODE
     environment: str = settings.ENVIRONMENT
     app_name: str = settings.PROJECT_NAME
+
+
+@dataclasses.dataclass(kw_only=True)
+class PublishTranslationsRequestSchema(base.ClientRequestDataSchema):
+    environments: list[str] = lambda: [settings.ENVIRONMENT]
+    app_name: str
+
+
+@dataclasses.dataclass(kw_only=True)
+class PublishTranslationsItemResponseSchema(base.ClientResponseDataSchema):
+    total: int
+    new: int
+    language: str
+
+    @classmethod
+    def build(cls, data: dict[str, typing.Any]) -> typing.Self:
+        return cls(
+            total=data['total'],
+            new=data['new'],
+            language=data['language'],
+        )
+
+
+@dataclasses.dataclass(kw_only=True)
+class PublishTranslationsResponseSchema(base.ClientResponseDataSchema):
+    items: list[PublishTranslationsItemResponseSchema]
+
+    @classmethod
+    def build(cls, data: dict) -> typing.Self:
+        return cls(
+            items=[PublishTranslationsItemResponseSchema.build(item) for item in data['items']],
+        )

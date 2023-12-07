@@ -6,6 +6,7 @@ from django.conf import settings
 from coex_translator.app_settings import app_settings
 from coex_translator.internal import storage, clients, constants
 from coex_translator.service import TranslationService
+from coex_translator.internal.clients.base import exceptions as http_client_exceptions
 
 logger = logging.getLogger(__name__)
 TranslationsType = dict[str, str]  # message_key: translation
@@ -67,7 +68,16 @@ class TranslationRefreshService:
 
     def _get_translator_translations_by_app(self, language: LangCodeStr, app_name: str) -> TranslationsType:
         """Fetch translations from the Translator service."""
-        fetched_translations = clients.TranslatorClient().fetch_translations(language=language)
+        try:
+            fetched_translations = clients.TranslatorClient().fetch_translations(language=language)
+        except http_client_exceptions.HttpClientException as e:
+            logger.error(
+                f"Unable to fetch translations for language `{language}` from the Translator service.",
+                extra={
+                    'error': str(e),
+                }
+            )
+            return {}
         return {t.message.key: t.translation for t in fetched_translations if t.translation is not None}
 
     def _get_translator_translations(self, language: LangCodeStr) -> TranslationsType:

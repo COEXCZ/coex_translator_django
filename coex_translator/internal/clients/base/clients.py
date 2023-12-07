@@ -13,8 +13,9 @@ HTTPMethodsType = typing.Literal['get', 'post', 'put', 'delete']
 
 
 class BaseHttpClient:
-    exception_cls: type[exceptions.HttpClientException] = exceptions.HttpClientException
-    verbose_name: str = 'HTTP Client'
+    exception_cls: typing.ClassVar[type[exceptions.HttpClientException]] = exceptions.HttpClientException
+    verbose_name: typing.ClassVar[str] = 'HTTP Client'
+    timeout: typing.ClassVar[int] = 60
 
     def _send_post_request(self, url: str, data: dict) -> requests.Response:
         return self._send_request(method='post', url=url, data=data)
@@ -47,10 +48,14 @@ class BaseHttpClient:
                 json=data,
                 headers=self._get_headers(method=method, url=url, data=data),
                 params=params,
+                timeout=self.timeout
             )
         except requests.ConnectionError as e:
             logger.error(f'Http Client API connection error, {e}', exc_info=True)
             raise self.exception_cls(f"{self} connection error", response=e.response)
+        except requests.Timeout as e:
+            logger.error(f'Http Client API timeout error, {e}', exc_info=True)
+            raise self.exception_cls(f"{self} timeout error")
 
         logger.debug(f"For request ({identifier}) received response {resp.status_code}")
         if resp.ok:

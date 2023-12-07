@@ -64,6 +64,7 @@ COEX_TRANSLATOR: "CoexTranslatorSettings" = {
     "API_TOKEN": config('COEX_TRANSLATOR_API_TOKEN', default=''),
     "UVICORN_RELOAD_FILE_PATH": config('COEX_TRANSLATOR_UVICORN_RELOAD_FILE_PATH', default=''),
     "STARTUP_REFRESH_ENABLED": config('COEX_TRANSLATOR_STARTUP_REFRESH_ENABLED', default=False, cast=bool),
+    "DISABLE_IN_MANAGEMENT_COMMANDS": config('COEX_TRANSLATOR_DISABLE_IN_MANAGEMENT_COMMANDS', default=False, cast=bool),
     "AMQP": {
         "BROKER_URL": config('COEX_TRANSLATOR_AMQP_BROKER_URL', default=f"amqp://{PROJECT_NAME}:{PROJECT_NAME}@rabbitmq/{PROJECT_NAME}"),
         "QUEUE_PREFIX": config('COEX_TRANSLATOR_AMQP_QUEUE_PREFIX', default='translation'),

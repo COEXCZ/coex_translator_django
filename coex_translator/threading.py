@@ -61,7 +61,11 @@ class ThreadedAMPQConsumer(threading.Thread):
         )
 
     def on_channel_closed(self, channel: pika.channel.Channel, reason: pika.exceptions.AMQPChannelError):
-        self._connection.close()
+        try:
+            self._connection.close()
+        except pika.exceptions.ConnectionWrongStateError:
+            #  Connection is already closed
+            pass
 
     def on_exchange_declareok(self, method_frame: pika.frame.Method):
         self._channel.queue_declare(queue=self.queue_name, auto_delete=True, callback=self.on_queue_declareok)

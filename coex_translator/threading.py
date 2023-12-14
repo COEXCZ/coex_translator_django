@@ -11,6 +11,7 @@ import pika.frame
 
 import socket
 
+from coex_translator.app_settings import app_settings
 
 logger = logging.getLogger(__name__)
 
@@ -34,10 +35,10 @@ class ThreadedAMPQConsumer(threading.Thread):
         self._retries = 0
 
     def _retry_connect(self, connection_error: pika.exceptions.AMQPError):
-        if self._retries > 3:
+        try:
+            countdown = app_settings["AMQP"]["CONNECTION_RETRY_COUNTDOWN"][self._retries]
+        except IndexError:
             raise Exception("Too many retries") from connection_error
-
-        countdown = 1 * (10**self._retries)  # (1, 10, 100)
 
         logger.warning("AMQP Connection error, retrying",
                        extra={'countdown': countdown, 'retries': self._retries, 'error': str(connection_error)})

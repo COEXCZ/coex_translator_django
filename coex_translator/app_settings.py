@@ -21,6 +21,7 @@ class _AMQPSettings(typing.TypedDict):
     QUEUE_PREFIX: str
     EXCHANGE: str
     ROUTING_KEY: str
+    CONNECTION_RETRY_COUNTDOWN: list[int] # Seconds to wait before retrying to connect to the broker
 
 
 class _StorageSettings(typing.TypedDict):

@@ -13,6 +13,7 @@ class CoexTranslatorSettings(typing.TypedDict):
     FETCH_WITH_FE: bool
     AMQP: "_AMQPSettings"
     STORAGE: "_StorageSettings"
+    DISABLE_IN_MANAGEMENT_COMMANDS: bool
 
 
 class _AMQPSettings(typing.TypedDict):

@@ -1,3 +1,4 @@
+from time import sleep
 from unittest import mock
 
 import pika
@@ -19,7 +20,7 @@ class AMQPTestCase(TestCase):
             auto_delete=True,
         )
 
-        self.consumer = ThreadedTranslationAMQPConsumer()
+        self.consumer = ThreadedTranslationAMQPConsumer(daemon=True)
         channel.queue_declare(queue=self.consumer.queue_name, auto_delete=True)
         channel.queue_bind(
             queue=self.consumer.queue_name,
@@ -39,6 +40,31 @@ class AMQPTestCase(TestCase):
         self.publisher.publish_update_translations()
 
         self.consumer.start()
-        self.consumer.join(timeout=1)
+
+        sleep(1)
 
         on_message_mock.assert_called_once_with(TranslationAMQPPublisher.TRANSLATION_UPDATE_MESSAGE.encode('utf-8'))
+
+    @mock.patch('coex_translator.consumer.ThreadedTranslationAMQPConsumer.on_message')
+    def test_consumer_retry(self, on_message_mock):
+        from coex_translator.publisher import TranslationAMQPPublisher
+
+        self.publisher.publish_update_translations()
+
+        self.consumer.start()
+
+        sleep(1)
+
+        on_message_mock.assert_called_once_with(TranslationAMQPPublisher.TRANSLATION_UPDATE_MESSAGE.encode('utf-8'))
+
+        self.consumer._connection.close()
+
+        sleep(2)
+
+        #  Connection is recovering
+
+        self.publisher.publish_update_translations()
+
+        sleep(1)
+
+        self.assertEqual(on_message_mock.call_count, 2)

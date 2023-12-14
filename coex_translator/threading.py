@@ -1,4 +1,7 @@
 import threading
+import logging
+
+from time import sleep
 
 import pika
 import pika.channel
@@ -7,6 +10,10 @@ import pika.exceptions
 import pika.frame
 
 import socket
+
+from coex_translator.app_settings import app_settings
+
+logger = logging.getLogger(__name__)
 
 
 class ThreadedAMPQConsumer(threading.Thread):
@@ -20,10 +27,33 @@ class ThreadedAMPQConsumer(threading.Thread):
         self.queue_name = f"{self.QUEUE_PREFIX}.{socket.gethostname()}"
         self._connection = None
         self._channel = None
+        self._retries = 0
 
     def on_connection_open(self, connection):
         self._connection = connection
         self._connection.channel(on_open_callback=self.on_channel_open)
+        self._retries = 0
+
+    def _retry_connect(self, connection_error: pika.exceptions.AMQPError):
+        try:
+            countdown = app_settings["AMQP"]["CONNECTION_RETRY_COUNTDOWN"][self._retries]
+        except IndexError:
+            raise Exception("Too many retries") from connection_error
+
+        logger.warning("AMQP Connection error, retrying",
+                       extra={'countdown': countdown, 'retries': self._retries, 'error': str(connection_error)})
+        sleep(countdown)
+
+        self._retries += 1
+        self.connect()
+
+    def on_connection_closed(self, connection: pika.SelectConnection, reason: pika.exceptions.AMQPConnectionError):
+        self._connection = None
+        self._channel = None
+        self._retry_connect(reason)
+
+    def on_connection_error(self, connection: pika.SelectConnection, error: pika.exceptions.AMQPError):
+        self._retry_connect(error)
 
     def on_channel_open(self, channel):
         self._channel = channel
@@ -35,14 +65,23 @@ class ThreadedAMPQConsumer(threading.Thread):
         )
 
     def on_channel_closed(self, channel: pika.channel.Channel, reason: pika.exceptions.AMQPChannelError):
-        self._connection.close()
+        try:
+            self._connection.close()
+        except pika.exceptions.ConnectionWrongStateError:
+            #  Connection is already closed
+            pass
 
     def on_exchange_declareok(self, method_frame: pika.frame.Method):
         self._channel.queue_declare(queue=self.queue_name, auto_delete=True, callback=self.on_queue_declareok)
 
     def on_queue_declareok(self, method_frame: pika.frame.Method):
-        self._channel.queue_bind(queue=self.queue_name, exchange=self.EXCHANGE, routing_key=self.ROUTING_KEY)
-        self._channel.basic_consume(self.queue_name, on_message_callback=self.callback)
+        try:
+            self._channel.queue_bind(queue=self.queue_name, exchange=self.EXCHANGE, routing_key=self.ROUTING_KEY)
+        except pika.exceptions.ChannelWrongStateError as e:
+            #  Channel is already closing or is not opened yet
+            self._retry_connect(e)
+        else:
+            self._channel.basic_consume(self.queue_name, on_message_callback=self.callback)
 
     def on_message(self, body: bytes):
         raise NotImplementedError()
@@ -54,13 +93,22 @@ class ThreadedAMPQConsumer(threading.Thread):
 
     def connect(self):
         parameters = pika.URLParameters(self.BROKER_URL)
-        self._connection = pika.SelectConnection(parameters, on_open_callback=self.on_connection_open)
+        self._connection = pika.SelectConnection(
+            parameters,
+            on_open_callback=self.on_connection_open,
+            on_close_callback=self.on_connection_closed,
+            on_open_error_callback=self.on_connection_error
+        )
         self._connection.ioloop.start()
 
     def run(self):
         self.connect()
 
     def stop(self):
-        self._connection.ioloop.stop()
+        if not self._connection:
+            #  Connection is already closed
+            return
+
         if self._channel:
             self._channel.close()
+        self._connection.ioloop.stop()

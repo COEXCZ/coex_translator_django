@@ -161,6 +161,7 @@ COEX_TRANSLATOR: "CoexTranslatorSettings" = {
         "EXCHANGE": config('COEX_TRANSLATOR_AMQP_EXCHANGE', default='translation'),
         "ROUTING_KEY": config('COEX_TRANSLATOR_AMQP_ROUTING_KEY', default='translation'),
         "CONSUMER_DAEMON_ENABLED": config('COEX_TRANSLATOR_AMQP_CONSUMER_DAEMON_ENABLED', default=False, cast=bool),
+        "CONNECTION_RETRY_COUNTDOWN": config('COEX_TRANSLATOR_AMQP_CONNECTION_RETRY_COUNTDOWN', default='1,10,100', cast=Csv(int)),
     },
     "STORAGE": {
         "ACCESS_KEY_ID": config('COEX_TRANSLATOR_STORAGE_ACCESS_KEY_ID', default=''),

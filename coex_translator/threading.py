@@ -51,6 +51,9 @@ class ThreadedAMPQConsumer(threading.Thread):
         self._channel = None
         self._retry_connect(reason)
 
+    def on_connection_error(self, connection: pika.SelectConnection, error: pika.exceptions.AMQPError):
+        self._retry_connect(error)
+
     def on_channel_open(self, channel):
         self._channel = channel
         self._channel.add_on_close_callback(self.on_channel_closed)
@@ -92,7 +95,8 @@ class ThreadedAMPQConsumer(threading.Thread):
         self._connection = pika.SelectConnection(
             parameters,
             on_open_callback=self.on_connection_open,
-            on_close_callback=self.on_connection_closed
+            on_close_callback=self.on_connection_closed,
+            on_open_error_callback=self.on_connection_error
         )
         self._connection.ioloop.start()
 

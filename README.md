@@ -18,7 +18,7 @@ poetry add git+ssh://git@github.com/COEXCZ/coex_translator_django.git
 
 Add coex_translator to `INSTALLED_APPS`.
 
-```diff
+```python
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -33,7 +33,7 @@ INSTALLED_APPS = [
 
 Setup in memory cache for translations.
 
-```diff
+```python
 DJANGO_CACHE_TRANSLATIONS = 'translations'
 CACHES = {
     DJANGO_CACHE_TRANSLATIONS: {
@@ -45,6 +45,17 @@ CACHES = {
 }
 ```
 
+## include urls
+
+```python
+from django.urls import include, path
+
+urlpatterns = [
+    ...
+    path('coex-translator/', include('coex_translator.urls')),
+]
+```
+
 ## Deployment
 
 ### Settings
@@ -53,18 +64,28 @@ The settings are namespaced under `COEX_TRANSLATOR` key.
 Settings example:
 ```python
 import typing
+import os
+
+from decouple import AutoConfig, Csv
 
 if typing.TYPE_CHECKING:
     from coex_translator.app_settings import CoexTranslatorSettings
 
+config = AutoConfig(os.environ.get("DJANGO_CONFIG_ENV_DIR"))
+
+PROJECT_NAME = config('PROJECT_NAME', default='coex_translator')
+
+
 ...
-    
+
+
 COEX_TRANSLATOR: "CoexTranslatorSettings" = {
     "API_BASE_URL": config('COEX_TRANSLATOR_API_BASE_URL', default=''),
     "API_TOKEN": config('COEX_TRANSLATOR_API_TOKEN', default=''),
     "UVICORN_RELOAD_FILE_PATH": config('COEX_TRANSLATOR_UVICORN_RELOAD_FILE_PATH', default=''),
     "STARTUP_REFRESH_ENABLED": config('COEX_TRANSLATOR_STARTUP_REFRESH_ENABLED', default=False, cast=bool),
     "DISABLE_IN_MANAGEMENT_COMMANDS": config('COEX_TRANSLATOR_DISABLE_IN_MANAGEMENT_COMMANDS', default=False, cast=bool),
+    'WEBHOOK_SECRET': config('COEX_TRANSLATOR_WEBHOOK_SECRET', default=''),
     "AMQP": {
         "BROKER_URL": config('COEX_TRANSLATOR_AMQP_BROKER_URL', default=f"amqp://{PROJECT_NAME}:{PROJECT_NAME}@rabbitmq/{PROJECT_NAME}"),
         "QUEUE_PREFIX": config('COEX_TRANSLATOR_AMQP_QUEUE_PREFIX', default='translation'),

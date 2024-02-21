@@ -24,8 +24,8 @@ class PublishWebhookView(View):
             return HttpResponseForbidden()
         return super().dispatch(request, *args, **kwargs)
 
-    def put(self):
-        if json.loads(self.request.body).get('message') == TranslationAMQPPublisher.TRANSLATION_UPDATE_MESSAGE:
+    def put(self, request):
+        if json.loads(request.body).get('message') == TranslationAMQPPublisher.TRANSLATION_UPDATE_MESSAGE:
             TranslationAMQPPublisher.publish_update_translations()
             return HttpResponse()
         return HttpResponseForbidden()

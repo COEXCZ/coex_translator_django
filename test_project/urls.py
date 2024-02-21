@@ -19,5 +19,5 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('coex_translator/', include('coex_translator.urls')),
+    path('coex-translator/', include('coex_translator.urls')),
 ]

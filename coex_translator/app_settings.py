@@ -14,6 +14,7 @@ class CoexTranslatorSettings(typing.TypedDict):
     AMQP: "_AMQPSettings"
     STORAGE: "_StorageSettings"
     DISABLE_IN_MANAGEMENT_COMMANDS: bool
+    WEBHOOK_SECRET: str
 
 
 class _AMQPSettings(typing.TypedDict):

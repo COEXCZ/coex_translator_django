@@ -13,7 +13,7 @@ class PublishWebhookView(View):
         webhook_secret = app_settings.get('WEBHOOK_SECRET')
         if not webhook_secret:
             return True
-        auth_header = self.request.META.get('HTTP_AUTHORIZATION')
+        auth_header = self.request.META.get('HTTP_X_AUTHORIZATION')
         if not auth_header:
             return False
 

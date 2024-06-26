@@ -10,7 +10,7 @@ from coex_translator.internal.clients.translator import schemas
 
 class TranslatorClient(base.BaseAuthHttpClient):  # TODO set up auth token?
     base_url: typing.ClassVar[str] = app_settings["API_BASE_URL"]
-    token: typing.ClassVar[str] = app_settings['API_TOKEN']
+    default_token: typing.ClassVar[str] = app_settings['API_TOKEN']
 
     def fetch_translations(
             self,

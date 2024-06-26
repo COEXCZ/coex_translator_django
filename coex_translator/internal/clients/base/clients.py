@@ -79,7 +79,7 @@ class BaseHttpClient:
 
 
 class BaseAuthHttpClient(BaseHttpClient):
-    default_token: str = None
+    default_token: typing.ClassVar[str] = None
 
     def __init__(self, token: str | None = None):
         if token is None:

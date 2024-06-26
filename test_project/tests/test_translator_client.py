@@ -81,3 +81,11 @@ class TranslatorClientTestCase(TestCase):
             )
 
             self.assertEqual(len(publish_results.items), len(fixture_data['items']))
+
+    def test_client_default_token_set_on_instance(self):
+        client = TranslatorClient()
+        self.assertEqual(client.token, app_settings['API_TOKEN'])
+
+    def test_client_custom_token_set_on_instance(self):
+        client = TranslatorClient(token="CUSTOM_TOKEN")
+        self.assertEqual(client.token, "CUSTOM_TOKEN")

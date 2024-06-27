@@ -27,7 +27,7 @@ class TranslatorClient(base.BaseAuthHttpClient):  # TODO set up auth token?
                 app_name=app_name,
             ).dict()
         )
-        return [schemas.TranslationResponseSchema.build(d) for d in resp.json()]
+        return [schemas.TranslationResponseSchema.build(d) for d in resp.json().get('items', [])]
 
     def export_messages(
             self,

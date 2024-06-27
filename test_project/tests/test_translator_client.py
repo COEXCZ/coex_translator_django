@@ -33,7 +33,7 @@ class TranslatorClientTestCase(TestCase):
 
     def test_fetch_translations(self):
         fixture_data: list[dict] = load_fixture('translator_service/translations_response.json')
-        mock_resp = MockResponse(data=fixture_data)
+        mock_resp = MockResponse(data={'items': fixture_data})
         with mock.patch('requests.request', return_value=mock_resp) as request_mock:
             translations = self.trans_client.fetch_translations()
             request_mock.assert_called_once_with(
